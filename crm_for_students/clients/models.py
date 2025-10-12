@@ -21,14 +21,21 @@ class ClientStage(models.Model):
 
     status = models.IntegerField(choices=STAGE_CHOICES, unique=True)
 
-    def __str__(self):
-        return dict(self.STAGE_CHOICES)[self.status]
+    class Meta:
+        db_table = "client_stage"   
+        verbose_name = "Client Stage"
+        verbose_name_plural = "Client Stages"
 
 class Team(models.Model):
     name = models.CharField(max_length=30, unique=True)
     description = models.TextField(null=True)
     inserted_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = "teams"  # custom table name
+        verbose_name = "Team"
+        verbose_name_plural = "Teams"
 
 class Client(models.Model):
     fullname = models.TextField()
@@ -46,6 +53,12 @@ class Client(models.Model):
         related_name='clients'
     )
 
+    class Meta:
+        db_table = "client"  
+        verbose_name = "Client"
+        verbose_name_plural = "Clients"
+
+
 class ActivityLog(models.Model):
     action = models.TextField()
     inserted_at = models.DateTimeField(default=timezone.now)
@@ -59,3 +72,7 @@ class ActivityLog(models.Model):
         on_delete=models.CASCADE,
         related_name='activity_logs'
     )
+    class Meta:
+        db_table = "activity_log"
+        verbose_name = "Activity Log"
+        verbose_name_plural = "Activity Logs"
