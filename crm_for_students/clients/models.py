@@ -1,10 +1,23 @@
-#django modules
+# Django modules
 from django.db import models
 from django.conf import settings 
 from django.utils import timezone
 
+# Project modules
+from teams.models import Team, User
+
 
 class ClientStage(models.Model):
+    """
+    Represents the various stages a client can be in within the sales or engagement process.
+
+    Stages:
+        1 - New
+        2 - Contacted
+        3 - Negotiating
+        4 - Closed (Success)
+        5 - Closed (Lost)
+    """
     NEW = 1
     CONTACTED = 2
     NEGOTIATING = 3
@@ -22,22 +35,15 @@ class ClientStage(models.Model):
     status = models.IntegerField(choices=STAGE_CHOICES, unique=True)
 
     class Meta:
-        db_table = "client_stage"   
+        db_table = "client_stage"
         verbose_name = "Client Stage"
         verbose_name_plural = "Client Stages"
 
-class Team(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-    description = models.TextField(null=True)
-    inserted_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        db_table = "teams"  # custom table name
-        verbose_name = "Team"
-        verbose_name_plural = "Teams"
 
 class Client(models.Model):
+    """
+    Represents a client in the system.
+    """
     fullname = models.TextField()
     email = models.CharField(max_length=89, unique=True)
     phone_number = models.TextField()
@@ -54,16 +60,19 @@ class Client(models.Model):
     )
 
     class Meta:
-        db_table = "client"  
+        db_table = "client"
         verbose_name = "Client"
         verbose_name_plural = "Clients"
 
 
 class ActivityLog(models.Model):
+    """
+    Logs actions performed by users on clients.
+    """
     action = models.TextField()
     inserted_at = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         related_name='activity_logs'
     )
@@ -72,6 +81,7 @@ class ActivityLog(models.Model):
         on_delete=models.CASCADE,
         related_name='activity_logs'
     )
+
     class Meta:
         db_table = "activity_log"
         verbose_name = "Activity Log"

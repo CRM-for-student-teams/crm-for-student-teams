@@ -12,3 +12,9 @@ python-dotenv==1.1.1
 
 # Build Tools
 setuptools==80.9.0
+
+# Admin UI
+django-unfold
+
+# CORS
+django-cors-headers
