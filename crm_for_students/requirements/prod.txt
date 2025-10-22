@@ -18,3 +18,9 @@ django-unfold
 
 # CORS
 django-cors-headers
+
+# ASGI Server
+uvicorn[standard]==0.23.2
+
+# Static Files Handling
+whitenoise==6.4.0

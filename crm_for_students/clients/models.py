@@ -1,6 +1,6 @@
 # Django modules
 from django.db import models
-from django.conf import settings 
+from django.conf import settings
 from django.utils import timezone
 
 # Project modules
@@ -18,6 +18,7 @@ class ClientStage(models.Model):
         4 - Closed (Success)
         5 - Closed (Lost)
     """
+
     NEW = 1
     CONTACTED = 2
     NEGOTIATING = 3
@@ -25,11 +26,11 @@ class ClientStage(models.Model):
     CLOSED_LOST = 5
 
     STAGE_CHOICES = [
-        (NEW, 'New'),
-        (CONTACTED, 'Contacted'),
-        (NEGOTIATING, 'Negotiating'),
-        (CLOSED_SUCCESS, 'Closed (Success)'),
-        (CLOSED_LOST, 'Closed (Lost)'),
+        (NEW, "New"),
+        (CONTACTED, "Contacted"),
+        (NEGOTIATING, "Negotiating"),
+        (CLOSED_SUCCESS, "Closed (Success)"),
+        (CLOSED_LOST, "Closed (Lost)"),
     ]
 
     status = models.IntegerField(choices=STAGE_CHOICES, unique=True)
@@ -44,20 +45,14 @@ class Client(models.Model):
     """
     Represents a client in the system.
     """
+
     fullname = models.TextField()
     email = models.CharField(max_length=89, unique=True)
     phone_number = models.TextField()
     stage = models.ForeignKey(
-        ClientStage,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='clients'
+        ClientStage, on_delete=models.SET_NULL, null=True, related_name="clients"
     )
-    team = models.ForeignKey(
-        Team,
-        on_delete=models.CASCADE,
-        related_name='clients'
-    )
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="clients")
 
     class Meta:
         db_table = "client"
@@ -69,17 +64,14 @@ class ActivityLog(models.Model):
     """
     Logs actions performed by users on clients.
     """
+
     action = models.TextField()
     inserted_at = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='activity_logs'
+        User, on_delete=models.CASCADE, related_name="activity_logs"
     )
     client = models.ForeignKey(
-        Client,
-        on_delete=models.CASCADE,
-        related_name='activity_logs'
+        Client, on_delete=models.CASCADE, related_name="activity_logs"
     )
 
     class Meta:

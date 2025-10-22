@@ -9,9 +9,10 @@ class ActivityLogInline(admin.TabularInline):
     Inline admin interface for displaying and managing activity logs
     directly from the Client admin page.
     """
+
     model = ActivityLog
     extra = 1  # Number of empty activity log rows shown by default
-    readonly_fields = ('inserted_at',)  # Prevent editing the timestamp
+    readonly_fields = ("inserted_at",)  # Prevent editing the timestamp
 
 
 @admin.register(Client)
@@ -22,9 +23,10 @@ class ClientAdmin(BaseModelAdmin):
     Allows filtering by stage and team, searching by name or email,
     and viewing related activity logs inline.
     """
-    list_display = ('fullname', 'email', 'phone_number', 'stage', 'team')
-    list_filter = ('stage', 'team')
-    search_fields = ('fullname', 'email')
+
+    list_display = ("fullname", "email", "phone_number", "stage", "team")
+    list_filter = ("stage", "team")
+    search_fields = ("fullname", "email")
     inlines = [ActivityLogInline]
 
 
@@ -35,7 +37,8 @@ class ClientStageAdmin(BaseModelAdmin):
 
     Displays the numeric status field representing the client stage.
     """
-    list_display = ('status',)
+
+    list_display = ("status",)
 
 
 @admin.register(ActivityLog)
@@ -46,6 +49,7 @@ class ActivityLogAdmin(BaseModelAdmin):
     Supports filtering by date, client, and user,
     and searching by client name, user name, or action content.
     """
-    list_display = ('user', 'client', 'action', 'inserted_at')
-    list_filter = ('inserted_at', 'client', 'user')
-    search_fields = ('client__fullname', 'action', 'user__username')
+
+    list_display = ("user", "client", "action", "inserted_at")
+    list_filter = ("inserted_at", "client", "user")
+    search_fields = ("client__fullname", "action", "user__username")

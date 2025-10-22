@@ -8,6 +8,7 @@ class User(models.Model):
     """
     Represents a user in the system.
     """
+
     ROLE_CHOICES = [
         ("captain", "Captain"),
         ("member", "Member"),
@@ -32,15 +33,13 @@ class Team(models.Model):
     """
     Represents a team within the system.
     """
+
     name = models.CharField(max_length=200)
     description = models.TextField()
     inserted_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     members = models.ManyToManyField(
-        User,
-        through="TeamMembership",
-        related_name="teams",
-        verbose_name="members"
+        User, through="TeamMembership", related_name="teams", verbose_name="members"
     )
 
     class Meta:
@@ -56,6 +55,7 @@ class TeamMembership(models.Model):
     """
     Intermediate model for linking users to teams with a specific role.
     """
+
     ROLE_CHOICES = [
         ("captain", "Captain"),
         ("member", "Member"),

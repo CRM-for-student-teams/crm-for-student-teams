@@ -4,10 +4,8 @@ services:
     restart: unless-stopped
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: student_crm
+    env_file:
+      - .env
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,16 +21,11 @@ services:
       - "8000:8000"
     volumes:
       - ./crm_for_students:/app
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: student_crm
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+    env_file:
+      - ./crm_for_students/.env
     depends_on:
       db:
         condition: service_healthy
-    command: python manage.py runserver 0.0.0.0:8000
 
 volumes:
   pg_data:
