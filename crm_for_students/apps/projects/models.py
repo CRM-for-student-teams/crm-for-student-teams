@@ -11,7 +11,8 @@ from django.db.models import (
 from django.conf import settings
 from django.utils import timezone
 
-from clients.models import Team
+from apps.teams.models import Team, User
+
 
 class Project(Model):
     """
@@ -26,10 +27,10 @@ class Project(Model):
     team = ForeignKey(
         to=Team,
         on_delete=CASCADE,
-        related_name='projects',
+        related_name="projects",
     )
-    created_at = DateTimeField(default=timezone.now)
-    updated_at = DateTimeField(default=timezone.now)
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "projects"
@@ -38,7 +39,8 @@ class Project(Model):
 
     def __str__(self) -> str:
         return self.name
-    
+
+
 class Task(Model):
     """
     Model representing a task within a project.
@@ -49,9 +51,9 @@ class Task(Model):
     LOW_I: int = 1
     MEDIUM_I: int = 2
     HIGH_I: int = 3
-    LOW: str = 'Low'
-    MEDIUM: str = 'Medium'
-    HIGH: str = 'High'
+    LOW: str = "Low"
+    MEDIUM: str = "Medium"
+    HIGH: str = "High"
 
     PRIORITY_CHOICES: tuple[tuple[int, str]] = (
         (LOW_I, LOW),
@@ -62,9 +64,9 @@ class Task(Model):
     TODO_I: int = 1
     IN_PROGRESS_I: int = 2
     DONE_I: int = 3
-    TODO: str = 'To Do'
-    IN_PROGRESS: str = 'In Progress'
-    DONE: str = 'Done'
+    TODO: str = "To Do"
+    IN_PROGRESS: str = "In Progress"
+    DONE: str = "Done"
 
     STATUS_CHOICES: tuple[tuple[int, str]] = (
         (TODO_I, TODO),
@@ -72,20 +74,19 @@ class Task(Model):
         (DONE_I, DONE),
     )
 
-
     title = CharField(max_length=TITLE_MAX_LENGTH)
     description = TextField(blank=True)
     project = ForeignKey(
         to=Project,
         on_delete=CASCADE,
-        related_name='tasks',
+        related_name="tasks",
     )
     executor = ForeignKey(
-        to=settings.AUTH_USER_MODEL,
+        to=User,
         on_delete=SET_NULL,
         null=True,
         blank=True,
-        related_name='tasks',
+        related_name="tasks",
     )
     priority = IntegerField(
         choices=PRIORITY_CHOICES,
@@ -96,8 +97,8 @@ class Task(Model):
         default=TODO_I,
     )
     deadline = DateTimeField(null=True, blank=True)
-    created_at = DateTimeField(default=timezone.now)
-    updated_at = DateTimeField(default=timezone.now)
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "tasks"
@@ -106,7 +107,6 @@ class Task(Model):
 
     def __str__(self) -> str:
         return f"{self.title} ({self.get_status_display()})"
-    
+
     def get_status_display(self) -> str:
-        return dict(self.STATUS_CHOICES).get(self.status, 'Unknown')
-    
+        return dict(self.STATUS_CHOICES).get(self.status, "Unknown")

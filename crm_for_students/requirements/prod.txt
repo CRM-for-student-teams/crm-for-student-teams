@@ -1,0 +1,26 @@
+# Core Django Framework
+Django==5.0
+asgiref==3.10.0
+sqlparse==0.5.3
+
+# Database
+psycopg2-binary==2.9.11
+
+# Environment & Configuration
+python-decouple==3.8
+python-dotenv==1.1.1
+
+# Build Tools
+setuptools==80.9.0
+
+# Admin UI
+django-unfold
+
+# CORS
+django-cors-headers
+
+# ASGI Server
+uvicorn[standard]==0.23.2
+
+# Static Files Handling
+whitenoise==6.4.0
