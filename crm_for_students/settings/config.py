@@ -1,5 +1,6 @@
-import os
-from distutils.util import strtobool
+from decouple import config
 
-DEBUG = bool(strtobool(os.getenv("DJANGO_DEBUG", "True")))
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
+ENV_POSSIBLE_OPTIONS = ("dev", "prod")
+ENV_ID = config("DJANGO_ENV_ID", cast=str)
+SECRET_KEY = config("DJANGO_SECRET_KEY", cast=str)

@@ -12,7 +12,7 @@ class BaseModelAdmin(ModelAdmin):
     to maintain consistency and easily add shared functionality.
 
     Example usage in other apps:
-        from common.admin import BaseModelAdmin
+        from apps.common.admin import BaseModelAdmin
 
         @admin.register(MyModel)
         class MyModelAdmin(BaseModelAdmin):

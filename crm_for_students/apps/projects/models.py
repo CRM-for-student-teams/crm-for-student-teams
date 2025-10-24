@@ -11,7 +11,7 @@ from django.db.models import (
 from django.conf import settings
 from django.utils import timezone
 
-from teams.models import Team, User
+from apps.teams.models import Team, User
 
 
 class Project(Model):

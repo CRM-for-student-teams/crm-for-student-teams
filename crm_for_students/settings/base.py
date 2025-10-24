@@ -1,22 +1,13 @@
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
-from pathlib import Path
-import os
-from distutils.util import strtobool
+from decouple import config
 
-from .config import DEBUG, SECRET_KEY
-
+from settings.config import * # noqa F403
 
 ROOT_URLCONF = "settings.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
 ASGI_APPLICATION = "settings.asgi.application"
-
-ALLOWED_HOSTS = (
-    os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
-    if os.getenv("DJANGO_ALLOWED_HOSTS")
-    else []
-)
 
 # --------------------------------
 # Apps
@@ -32,9 +23,9 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     "corsheaders",
 ]
 PROJECT_APPS = [
-    "clients",
-    "projects",
-    "teams",
+    "apps.clients",
+    "apps.projects",
+    "apps.teams",
 ]
 INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS
 
@@ -83,21 +74,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "student_crm"),
-        "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
-    }
-}
-
-
 # ----------------------------------------------------------------
 # Internationalization
 # -----
@@ -120,8 +96,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS Settings
 # -------------------------------
 CORS_ALLOWED_ORIGINS = (
-    os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-    if os.getenv("CORS_ALLOWED_ORIGINS")
+    config("CORS_ALLOWED_ORIGINS", cast=str).split(",")
+    if config("CORS_ALLOWED_ORIGINS", cast=str)
     else []
 )
 

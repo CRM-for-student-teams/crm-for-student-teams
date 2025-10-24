@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 
 # Project modules
-from teams.models import Team, User
+from apps.teams.models import Team, User
 
 
 class ClientStage(models.Model):

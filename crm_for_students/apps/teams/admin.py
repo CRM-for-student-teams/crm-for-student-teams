@@ -1,7 +1,7 @@
 # Django modules
 from django.contrib import admin
 
-from common.admin import BaseModelAdmin
+from apps.common.admin import BaseModelAdmin
 
 # Project modules
 from .models import User, Team, TeamMembership
