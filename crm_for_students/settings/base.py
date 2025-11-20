@@ -2,7 +2,6 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
 from decouple import config
-
 from settings.config import * # noqa F403
 
 ROOT_URLCONF = "settings.urls"
@@ -72,6 +71,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+AUTH_USER_MODEL = "teams.CustomUser"
 
 
 # ----------------------------------------------------------------
@@ -140,7 +140,7 @@ UNFOLD = {
                         "icon": "groups",
                         "link": reverse_lazy(
                             "admin:clients_client_changelist"
-                        ),  # Заголовок кликабельный
+                        ),
                     },
                     {
                         "title": _("Projects"),
@@ -198,7 +198,7 @@ UNFOLD = {
             "models": [
                 "teams.team",
                 "teams.teammembership",
-                "teams.user",
+                "teams.customuser",
             ],
             "items": [
                 {
@@ -211,7 +211,7 @@ UNFOLD = {
                 },
                 {
                     "title": _("Users"),
-                    "link": reverse_lazy("admin:teams_user_changelist"),
+                    "link": reverse_lazy("admin:teams_customuser_changelist"),
                 },
             ],
         },
