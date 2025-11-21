@@ -11,7 +11,7 @@ from django.db.models import (
 from django.conf import settings
 from django.utils import timezone
 
-from apps.teams.models import Team, User
+from apps.teams.models import Team, CustomUser
 
 
 class Project(Model):
@@ -82,7 +82,7 @@ class Task(Model):
         related_name="tasks",
     )
     executor = ForeignKey(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=SET_NULL,
         null=True,
         blank=True,

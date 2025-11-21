@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 
 # Project modules
-from apps.teams.models import Team, User
+from apps.teams.models import Team, CustomUser
 
 
 class ClientStage(models.Model):
@@ -68,7 +68,7 @@ class ActivityLog(models.Model):
     action = models.TextField()
     inserted_at = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="activity_logs"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="activity_logs"
     )
     client = models.ForeignKey(
         Client, on_delete=models.CASCADE, related_name="activity_logs"

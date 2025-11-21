@@ -4,7 +4,7 @@ from django.contrib import admin
 from apps.common.admin import BaseModelAdmin
 
 # Project modules
-from .models import User, Team, TeamMembership
+from .models import CustomUser, Team, TeamMembership
 
 
 class TeamMembershipInline(admin.TabularInline):
@@ -19,17 +19,17 @@ class TeamMembershipInline(admin.TabularInline):
     verbose_name_plural = "Members"
 
 
-@admin.register(User)
+@admin.register(CustomUser)
 class UserAdmin(BaseModelAdmin):
     """
     Admin interface for managing User records.
     """
 
-    list_display = ("name", "role", "email", "inserted_at", "updated_at")
-    list_filter = ("role", "name")
-    search_fields = ("name", "email")
+    list_display = ("full_name", "role", "email", "inserted_at", "updated_at")
+    list_filter = ("role", "full_name")
+    search_fields = ("full_name", "email")
     readonly_fields = ("inserted_at",)
-    ordering = ("name",)
+    ordering = ("full_name",)
     list_per_page = 30
 
 
@@ -53,7 +53,7 @@ class TeamMembershipAdmin(BaseModelAdmin):
     """
 
     list_display = ("user", "team", "role", "inserted_at")
-    search_fields = ("user__name", "team__name")
+    search_fields = ("user__full_name", "team__name")
     list_filter = ("role", "team__name")
     ordering = ("-inserted_at",)
     readonly_fields = ("inserted_at",)
