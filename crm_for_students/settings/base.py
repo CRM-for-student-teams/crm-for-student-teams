@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
 from decouple import config
-from settings.config import * # noqa F403
+from settings.config import *  # noqa F403
 
 ROOT_URLCONF = "settings.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
@@ -11,7 +11,7 @@ ASGI_APPLICATION = "settings.asgi.application"
 # --------------------------------
 # Apps
 # -----
-DJANGO_AND_THIRD_PARTY_APPS = [
+DJANGO_APPS = [
     "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -19,14 +19,25 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "corsheaders",
 ]
 PROJECT_APPS = [
     "apps.clients",
     "apps.projects",
     "apps.teams",
 ]
-INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
+]
+
+INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
 
 
 # ----------------------------------------------------------------
