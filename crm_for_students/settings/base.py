@@ -21,7 +21,6 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 PROJECT_APPS = [
-    "apps.clients",
     "apps.projects",
     "apps.teams",
 ]
@@ -147,13 +146,6 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
-                        "title": _("Clients"),
-                        "icon": "groups",
-                        "link": reverse_lazy(
-                            "admin:clients_client_changelist"
-                        ),
-                    },
-                    {
                         "title": _("Projects"),
                         "icon": "folder",
                         "link": reverse_lazy("admin:projects_project_changelist"),
@@ -168,27 +160,6 @@ UNFOLD = {
         ],
     },
     "TABS": [
-        {
-            "models": [
-                "clients.client",
-                "clients.clientstage",
-                "clients.activitylog",
-            ],
-            "items": [
-                {
-                    "title": _("All Clients"),
-                    "link": reverse_lazy("admin:clients_client_changelist"),
-                },
-                {
-                    "title": _("Client Stages"),
-                    "link": reverse_lazy("admin:clients_clientstage_changelist"),
-                },
-                {
-                    "title": _("Activity Logs"),
-                    "link": reverse_lazy("admin:clients_activitylog_changelist"),
-                },
-            ],
-        },
         {
             "models": [
                 "projects.project",

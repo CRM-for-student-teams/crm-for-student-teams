@@ -82,8 +82,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
 
     ROLE_CHOICES = [
-        ("captain", "Captain"),
-        ("member", "Member"),
+        ("student_captain", "Student Captain"),
+        ("student_member", "Student Member"),
+        ("client", "Client"),
+
     ]
 
     ROLE_MAX_LENGHT = 50
