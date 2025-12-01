@@ -186,4 +186,163 @@ class TasksViewSet(ViewSet):
     A viewser for managing tasks.
     """
 
-    pass
+    # --------------------------------------------------------------
+    # for permission handling
+    def get_permissions(self):
+        if self.action in ["update", "partial_update", "destroy"]:
+            return [IsAuthenticated(), IsProjectTeamMember()]
+        return [IsAuthenticated()]
+
+    # --------------------------------------------------------------
+    # for the proper swagger ui and doc
+    def get_serializer_class(self):
+        return TaskSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        if serializer_class:
+            kwargs.setdefault("context", {"request": self.request, "view": self})
+            return serializer_class(*args, **kwargs)
+        return None
+
+    def list(self, request: Request) -> Response:
+        """
+        List all tasks.
+        """
+
+        tasks = Task.objects.all()
+        serializer: TaskSerializer = TaskSerializer(tasks, many=True)
+
+        return Response(
+            data={
+                "tasks": serializer.data,
+                "count": tasks.count(),
+                "details": "Tasks fetched successfully!",
+            }
+        )
+
+    def retrieve(self, request: Request, pk: int) -> Response:
+        """
+        Reetrieve a task by its ID.
+        """
+
+        try:
+            task = Task.objects.get(id=pk)
+        except Task.DoesNotExist:
+            return Response(
+                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+            )
+
+        serializer: TaskSerializer = TaskSerializer(task)
+        return Response(
+            data={
+                "task": serializer.data,
+                "details": "Task fetched successfully!",
+            },
+            status=HTTP_200_OK,
+        )
+
+    def create(self, request: Request) -> Response:
+        """
+        Create a new task.
+        """
+
+        serializer: TaskSerializer = TaskSerializer(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                data={
+                    "task": serializer.data,
+                    "details": "Task created successfully!",
+                },
+                status=HTTP_201_CREATED,
+            )
+        return Response(
+            data={
+                "errors": serializer.errors,
+                "details": "Task creation failed!",
+            },
+            status=HTTP_400_BAD_REQUEST,
+        )
+
+    def update(self, request: Request, pk: int) -> Response:
+        """
+        Update an existing task.
+        """
+
+        try:
+            task = Task.objects.get(id=pk)
+        except Task.DoesNotExist:
+            return Response(
+                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+            )
+
+        serializer: TaskSerializer = TaskSerializer(
+            task, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                data={
+                    "task": serializer.data,
+                    "details": "Task updated successfully!",
+                },
+                status=HTTP_200_OK,
+            )
+        return Response(
+            data={
+                "errors": serializer.errors,
+                "details": "Task update failed!",
+            },
+            status=HTTP_400_BAD_REQUEST,    
+        )
+    
+    def partial_update(self, request: Request, pk: int) -> Response:
+        """
+        Partially update an existing task.
+        """
+
+        try:
+            task = Task.objects.get(id=pk)
+        except Task.DoesNotExist:
+            return Response(
+                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+            )
+
+        serializer: TaskSerializer = TaskSerializer(
+            task, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                data={
+                    "task": serializer.data,
+                    "details": "Task partially updated successfully!",
+                },
+                status=HTTP_200_OK,
+            )
+        return Response(
+            data={
+                "errors": serializer.errors,
+                "details": "Task partial update failed!",
+            },
+            status=HTTP_400_BAD_REQUEST,    
+        )
+    
+    def destroy(self, request: Request, pk: int) -> Response:
+        """
+        Delete a task
+        """
+
+        try:
+            task = Task.objects.get(id=pk)
+        except Task.DoesNotExist:
+            return Response(
+                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+            )
+
+        task.delete()
+        return Response(
+            data={"details": "Task deleted successfully!"},
+            status=HTTP_204_NO_CONTENT,
+        )
