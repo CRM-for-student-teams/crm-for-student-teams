@@ -7,6 +7,8 @@ from settings.config import *  # noqa F403
 ROOT_URLCONF = "settings.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
 ASGI_APPLICATION = "settings.asgi.application"
+AUTH_USER_MODEL = "teams.CustomUser"
+
 
 # --------------------------------
 # Apps
@@ -27,6 +29,7 @@ PROJECT_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
+    "rest_framework_simplejwt",
     "corsheaders",
     "drf_spectacular",
     "drf_spectacular_sidecar",
@@ -81,7 +84,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-AUTH_USER_MODEL = "teams.CustomUser"
 
 
 # ----------------------------------------------------------------
