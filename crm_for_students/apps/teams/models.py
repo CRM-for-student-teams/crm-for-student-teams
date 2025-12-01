@@ -144,8 +144,9 @@ class TeamMembership(models.Model):
     """
 
     ROLE_CHOICES: list[tuple[str, str]] = [
-        ("captain", "Captain"),
-        ("member", "Member"),
+        ("student_captain", "Student Captain"),
+        ("student_member", "Student Member"),
+        ("client", "Client")
     ]
     ROLE_MAX_LENGHT: int = 50
     
