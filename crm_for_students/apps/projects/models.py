@@ -14,12 +14,14 @@ from django.utils import timezone
 from apps.teams.models import Team, CustomUser
 
 
+NAME_MAX_LENGTH: int = 100
+TITLE_MAX_LENGTH: int = 100
+
+
 class Project(Model):
     """
     Model representing a project within the CRM system.
     """
-
-    NAME_MAX_LENGTH: int = 100
 
     name = CharField(max_length=NAME_MAX_LENGTH)
     description = TextField(null=True, blank=True)
@@ -45,8 +47,6 @@ class Task(Model):
     """
     Model representing a task within a project.
     """
-
-    TITLE_MAX_LENGTH: int = 100
 
     LOW_I: int = 1
     MEDIUM_I: int = 2
