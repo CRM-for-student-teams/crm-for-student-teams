@@ -86,7 +86,7 @@ class TeamMembershipViewSet(ModelViewSet):
     queryset = TeamMembership.objects.all()
     serializer_class = TeamMembershipSerialier
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filter_backends = []
 
     filterset_field = ["team", "user", "role"]
     ordering_fields = ["inserted_at"]
