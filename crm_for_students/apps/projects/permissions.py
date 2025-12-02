@@ -12,4 +12,3 @@ class IsProjectTeamMember(BasePermission):
 
     def has_object_permission(self, request: Request, view: View, obj: Project) -> bool:
         return request.user in obj.team.members.all()
-    
