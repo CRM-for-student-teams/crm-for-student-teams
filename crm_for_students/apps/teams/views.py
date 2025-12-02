@@ -73,6 +73,7 @@ class TeamViewSet(ViewSet):
     )
     def retrieve(self, request, pk=None):
         team = self.get_object(pk)
+        self.check_object_permissions(request, team)
         serializer = TeamSerializer(team)
         return Response(serializer.data)
 
@@ -106,6 +107,7 @@ class TeamViewSet(ViewSet):
     )
     def update(self, request, pk=None):
         team = self.get_object(pk)
+        self.check_object_permissions(request, team)
 
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(
@@ -123,6 +125,7 @@ class TeamViewSet(ViewSet):
     )
     def partial_update(self, request, pk=None):
         team = self.get_object(pk)
+        self.check_object_permissions(request, team)
         serializer = TeamSerializer(team, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -135,12 +138,14 @@ class TeamViewSet(ViewSet):
     )
     def destroy(self, request, pk=None):
         team = self.get_object(pk)
+        self.check_object_permissions(request, team)
+
         team.delete()
         return Response(status=204)
 
     @extend_schema(
         summary="Get my teams",
-        description="Returns a list of teams the authenticated user is a member of.",
+        description="Returns a list of teams the authenticated user is a member of",
         tags=["Teams"],
         responses={200: TeamListSerializer(many=True)},
     )
@@ -153,7 +158,7 @@ class TeamViewSet(ViewSet):
 
     @extend_schema(
         summary="Leave a team",
-        description="Allows a user to leave a team. Captains cannot leave their team.",
+        description="Allows a user to leave a team. Captains cannot leave their team",
         request=None,
         tags=["Teams"],
         responses={
@@ -202,7 +207,7 @@ class TeamMembershipViewSet(ViewSet):
 
     @extend_schema(
         responses={200: OpenApiResponse(description="Permissions retrieved")},
-        description="Retrieve permissions depending on action.",
+        description="Retrieve permissions depending on action",
         tags=["Permissions"],
     )
     def get_permissions(self):
@@ -220,7 +225,7 @@ class TeamMembershipViewSet(ViewSet):
 
     @extend_schema(
         summary="List all team members",
-        description="Returns a list of all team memberships.",
+        description="Returns a list of all team memberships",
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier(many=True)},
     )
@@ -231,18 +236,20 @@ class TeamMembershipViewSet(ViewSet):
 
     @extend_schema(
         summary="Retrieve a team member",
-        description="Returns details of a specific team membership.",
+        description="Returns details of a specific team membership",
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier},
     )
     def retrieve(self, request, pk=None):
         membership = self.get_object(pk)
+        self.check_object_permissions(request, membership)
+
         serializer = self.serializer_class(membership)
         return Response(serializer.data)
 
     @extend_schema(
         summary="Add a team member",
-        description="Only team captains can add members to the team.",
+        description="Only team captains can add members to the team",
         request=TeamMembershipSerialier,
         tags=["TeamMembership"],
         responses={201: TeamMembershipSerialier},
@@ -266,13 +273,15 @@ class TeamMembershipViewSet(ViewSet):
 
     @extend_schema(
         summary="Update a team member",
-        description="Update a team membership.",
+        description="Update a team membership",
         request=TeamMembershipSerialier,
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier},
     )
     def update(self, request, pk=None):
         membership = self.get_object(pk)
+        self.check_object_permissions(request, membership)
+
         serializer = self.serializer_class(membership, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -280,13 +289,15 @@ class TeamMembershipViewSet(ViewSet):
 
     @extend_schema(
         summary="Partially update a team member",
-        description="Partially update a team membership.",
+        description="Partially update a team membership",
         request=TeamMembershipSerialier,
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier},
     )
     def partial_update(self, request, pk=None):
         membership = self.get_object(pk)
+        self.check_object_permissions(request, membership)
+
         serializer = self.serializer_class(
             membership, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -295,11 +306,13 @@ class TeamMembershipViewSet(ViewSet):
 
     @extend_schema(
         summary="Delete a team member",
-        description="Deletes a specific team membership.",
+        description="Deletes a specific team membership",
         tags=["TeamMembership"],
         responses={204: None},
     )
     def destroy(self, request, pk=None):
         membership = self.get_object(pk)
+        self.check_object_permissions(request, membership)
+
         membership.delete()
         return Response(status=HTTP_204_NO_CONTENT)

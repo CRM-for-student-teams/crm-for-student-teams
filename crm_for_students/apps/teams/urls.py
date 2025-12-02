@@ -1,4 +1,4 @@
-#Django modules
+# Django modules
 from django.urls import path, include
 # DRF modules
 from rest_framework.routers import DefaultRouter
@@ -13,8 +13,9 @@ from apps.teams.auth_views import CurrentUserView, CustomTokenPairView, LogoutVi
 from apps.teams.views import TeamViewSet, TeamMembershipViewSet
 
 router = DefaultRouter()
-router.register(r"teams", TeamViewSet, basename="team")
-router.register(r"membership", TeamMembershipViewSet, basename="membership")
+router.register(prefix="teams", viewset=TeamViewSet, basename="team")
+router.register(prefix="membership",
+                viewset=TeamMembershipViewSet, basename="membership")
 
 urlpatterns = [
     path("auth/register/", RegisterView.as_view(), name="register"),
@@ -26,5 +27,3 @@ urlpatterns = [
     path("", include(router.urls)),
 
 ]
-
-

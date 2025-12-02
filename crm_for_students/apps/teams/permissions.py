@@ -1,36 +1,56 @@
-# DRF modules
+# apps/teams/permissions.py
 from rest_framework.permissions import BasePermission
-from rest_framework.request import Request
-from rest_framework.views import View
-# Project modules
 from apps.teams.models import TeamMembership
+
 
 class IsTeamCaptain(BasePermission):
     """
-    Permission to check if user is the team captain or not
+    Permission to check if user is a team captain
     """
 
-    def has_object_permission(self, request: Request, view: View, obj):
-        if hasattr(obj, "id"):
-            team_id = obj.id
-        elif hasattr(obj, "team"):
-            team_id = obj.team.id
+    def has_permission(self, request, view):
+        """
+        Global permission check - user must be authenticated
+        """
+        return request.user and request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        """
+        Object-level permission check
+        """
+        if hasattr(obj, 'team'):
+            team = obj.team
         else:
-            return False
+            team = obj
+
         return TeamMembership.objects.filter(
-            user = request.user,
-            team_id = team_id,
-            role = "student_captain"
+            team=team,
+            user=request.user,
+            role='student_captain'
         ).exists()
-    
+
+
 class IsTeamMember(BasePermission):
     """
-    Permission to check if user is the team member
+    Permission to check if user is a member of the team
     """
 
-    def has_object_permission(self, request: Request, view: View, obj):
-        if hasattr(obj, "members"):
-            return obj.members.filter(id=request.user.id).exists()
-        if hasattr(obj,"team"):
-            return obj.team.members.filter(id=request.user.id).exists()
-        return False
+    def has_permission(self, request, view):
+        """
+        Global permission check - user must be authenticated
+        """
+        return request.user and request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        """
+        Object-level permission check
+        """
+        if hasattr(obj, 'team'):
+            team = obj.team
+        else:
+            team = obj
+
+        return TeamMembership.objects.filter(
+            team=team,
+            user=request.user
+        ).exists()
