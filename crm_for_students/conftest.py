@@ -2,12 +2,13 @@ from pytest import fixture
 
 from rest_framework.test import APIClient
 
-from apps.project.models import Project, Task
+from apps.projects.models import Project, Task
 from apps.teams.models import CustomUser, Team
 
 
 # ---------------------------------------------------------------------------
 # Users
+
 
 @fixture
 def user_client(db) -> CustomUser:
@@ -18,8 +19,9 @@ def user_client(db) -> CustomUser:
         role="client",
     )
 
+
 @fixture
-def user_student_member(db) ->  CustomUser:
+def user_student_member(db) -> CustomUser:
     return CustomUser.objects.create_user(
         email="student_member@test.com",
         password="12345",
@@ -27,8 +29,9 @@ def user_student_member(db) ->  CustomUser:
         role="student_member",
     )
 
+
 @fixture
-def user_student_captain(db) ->  CustomUser:
+def user_student_captain(db) -> CustomUser:
     return CustomUser.objects.create_user(
         email="student_captain@test.com",
         password="123455",
@@ -39,13 +42,14 @@ def user_student_captain(db) ->  CustomUser:
 
 # ---------------------------------------------------------------------------
 # API Client
-@fixture 
+@fixture
 def api_client() -> APIClient:
     return APIClient()
 
 
 # ---------------------------------------------------------------------------
 # Authenticated API Clients
+
 
 @fixture
 def auth_client_client(
@@ -55,7 +59,8 @@ def auth_client_client(
     api_client.force_authenticate(user=user_client)
     return api_client
 
-@fixture 
+
+@fixture
 def auth_client_student_member(
     api_client: APIClient,
     user_student_member: CustomUser,
@@ -63,12 +68,11 @@ def auth_client_student_member(
     api_client.force_authenticate(user=user_student_member)
     return api_client
 
-@fixture 
+
+@fixture
 def auth_client_student_captain(
     api_client: APIClient,
     user_student_captain: CustomUser,
 ) -> APIClient:
     api_client.force_authenticate(user=user_student_captain)
     return api_client
-
-

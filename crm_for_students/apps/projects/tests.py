@@ -17,6 +17,7 @@ def test_project_list():
     pass
 
 def test_project_list_unathenticated(api_client):
+    pass
     
 def test_project_fetch():
     pass

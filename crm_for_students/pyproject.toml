@@ -1,0 +1,3 @@
+[tool.pytest]
+min_version="9.0"
+python_path="."
