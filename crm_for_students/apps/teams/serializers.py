@@ -1,10 +1,14 @@
+# Third Party
+from typing import Any
+
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
     DateTimeField,
 )
 
-from crm_for_students.apps.teams.models import CustomUser, Team
+# Local Modules
+from apps.teams.models import CustomUser, Team
 
 
 class TeamSerializer(ModelSerializer):
@@ -49,3 +53,43 @@ class CustomUserSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class UserCRUDSerializer(ModelSerializer):
+    """
+    Serializer for creating and updating CustomUser instances.
+    Handles password hashing and optional updates.
+    """
+
+    password = CharField(write_only=True, required=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ["email", "full_name", "password",
+                  "role", "id", "inserted_at", "updated_at"]
+        read_only_fields = ["id", "inserted_at", "updated_at"]
+
+    def create(self, validated_data: dict[str, Any]) -> CustomUser:
+        """
+        Create a new user with hashed password.
+        """
+        password = validated_data.pop("password")
+        user = CustomUser(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance: CustomUser, validated_data: dict[str, Any]) -> CustomUser:
+        """
+        Update user fields. Hash password if provided.
+        """
+        password = validated_data.pop("password", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
