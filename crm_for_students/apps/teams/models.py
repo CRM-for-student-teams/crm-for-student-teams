@@ -81,15 +81,17 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     Represents a user in the system.
     """
 
-    ROLE_CHOICES = [
-        ("captain", "Captain"),
-        ("member", "Member"),
+    ROLE_CHOICES: list[tuple[str, str]] = [
+        ("student_captain", "Student Captain"),
+        ("student_member", "Student Member"),
+        ("client", "Client"),
+
     ]
 
-    ROLE_MAX_LENGHT = 50
-    EMAIL_MAX_LENGHT = 150
-    PASSWORD_MAX_LENGHT = 200
-    FULLNAME_MAX_LENGHT = 240
+    ROLE_MAX_LENGHT: int = 50
+    EMAIL_MAX_LENGHT: int = 150
+    PASSWORD_MAX_LENGHT: int = 200
+    FULLNAME_MAX_LENGHT: int = 240
 
     email = models.EmailField(max_length=EMAIL_MAX_LENGHT, unique=True)
     password = models.CharField(max_length=200, validators=[validate_password])
@@ -102,7 +104,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["full_name"]
-    objects = CustomUserManager()
+    objects: CustomUserManager = CustomUserManager()
 
     class Meta:
         db_table = "users"
@@ -117,7 +119,7 @@ class Team(models.Model):
     """
     Represents a team within the system.
     """
-    NAME_MAX_LENGHT = 200
+    NAME_MAX_LENGHT: int = 200
 
     name = models.CharField(max_length=NAME_MAX_LENGHT)
     description = models.TextField()
@@ -141,12 +143,13 @@ class TeamMembership(models.Model):
     Intermediate model for linking users to teams with a specific role.
     """
 
-    ROLE_CHOICES = [
-        ("captain", "Captain"),
-        ("member", "Member"),
+    ROLE_CHOICES: list[tuple[str, str]] = [
+        ("student_captain", "Student Captain"),
+        ("student_member", "Student Member"),
+        ("client", "Client")
     ]
-    ROLE_MAX_LENGHT = 50
-
+    ROLE_MAX_LENGHT: int = 50
+    
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     role = models.CharField(max_length=ROLE_MAX_LENGHT, choices=ROLE_CHOICES)

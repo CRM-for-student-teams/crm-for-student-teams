@@ -7,6 +7,8 @@ from settings.config import *  # noqa F403
 ROOT_URLCONF = "settings.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
 ASGI_APPLICATION = "settings.asgi.application"
+AUTH_USER_MODEL = "teams.CustomUser"
+
 
 # --------------------------------
 # Apps
@@ -21,13 +23,13 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 PROJECT_APPS = [
-    "apps.clients",
     "apps.projects",
     "apps.teams",
 ]
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
+    "rest_framework_simplejwt",
     "corsheaders",
     "drf_spectacular",
     "drf_spectacular_sidecar",
@@ -82,7 +84,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-AUTH_USER_MODEL = "teams.CustomUser"
 
 
 # ----------------------------------------------------------------
@@ -147,13 +148,6 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
-                        "title": _("Clients"),
-                        "icon": "groups",
-                        "link": reverse_lazy(
-                            "admin:clients_client_changelist"
-                        ),
-                    },
-                    {
                         "title": _("Projects"),
                         "icon": "folder",
                         "link": reverse_lazy("admin:projects_project_changelist"),
@@ -168,27 +162,6 @@ UNFOLD = {
         ],
     },
     "TABS": [
-        {
-            "models": [
-                "clients.client",
-                "clients.clientstage",
-                "clients.activitylog",
-            ],
-            "items": [
-                {
-                    "title": _("All Clients"),
-                    "link": reverse_lazy("admin:clients_client_changelist"),
-                },
-                {
-                    "title": _("Client Stages"),
-                    "link": reverse_lazy("admin:clients_clientstage_changelist"),
-                },
-                {
-                    "title": _("Activity Logs"),
-                    "link": reverse_lazy("admin:clients_activitylog_changelist"),
-                },
-            ],
-        },
         {
             "models": [
                 "projects.project",
