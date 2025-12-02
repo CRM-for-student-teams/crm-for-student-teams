@@ -50,3 +50,10 @@ SIMPLE_JWT = {
     "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Crm for students teams',
+    'DESCRIPTION': 'Some description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+

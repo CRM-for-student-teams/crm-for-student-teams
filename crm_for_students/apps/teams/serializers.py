@@ -106,7 +106,7 @@ class TeamSerializer(ModelSerializer):
             user=request.user,
             role = "studen_captain",
         )
-        return Team
+        return team
 
 class TeamListSerializer(ModelSerializer):
     """

@@ -3,7 +3,12 @@ from django.contrib.auth import get_user_model
 
 # DRF modules
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status
+from rest_framework.generics import (
+    GenericAPIView, 
+    CreateAPIView,
+    RetrieveAPIView,
+)
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -32,7 +37,7 @@ class CustomTokenPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(CreateAPIView):
     """
     User registration endpoint
     """
@@ -56,7 +61,7 @@ class RegisterView(generics.CreateAPIView):
         }, status=HTTP_201_CREATED)
     
 
-class CurrentUserView(generics.RetrieveAPIView):
+class CurrentUserView(RetrieveAPIView):
     """
     Ger current authenticated user info
     """
@@ -67,7 +72,7 @@ class CurrentUserView(generics.RetrieveAPIView):
         return self.request.user
     
 
-class LogoutView(generics.GenericAPIView):
+class LogoutView(GenericAPIView):
     """
     Logout by blacklisting the refresh token
     """
