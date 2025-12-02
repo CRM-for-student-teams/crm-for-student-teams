@@ -1,6 +1,7 @@
 from pytest import fixture
 
 from apps.projects.models import Project, Task
+from apps.teams.models import Team, TeamMembership
 from conftest import (
     api_client,
     auth_client_client,
@@ -11,31 +12,35 @@ from conftest import (
     user_student_member,
 )
 
+
 @fixture
-def project(db, user_student_captain) -> Project:
+def team(db, user_student_captain) -> Team:
+    team = Team.objects.create(
+        name="Test Team",
+        description="A team for testing purposes",
+    )
+    TeamMembership.objects.create(
+        user=user_student_captain,
+        team=team,
+        role="student_captain",
+    )
+    return team
+
+
+@fixture
+def project(db, team) -> Project:
     return Project.objects.create(
         name="Test Project",
         description="A project for testing purposes",
-        captain=user_student_captain,
+        team=team,
     )
+
 
 @fixture
 def task(db, user_student_member, project) -> Task:
     return Task.objects.create(
         title="Test Task",
         description="A task for testing purposes",
-        assigned_to=user_student_member,
+        executor=user_student_member,
         project=project,
     )
-
-
-
-
-
-
-
-
-
-
-
-
