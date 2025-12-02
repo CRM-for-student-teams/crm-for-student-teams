@@ -18,6 +18,8 @@ from rest_framework.status import (
 )
 
 # Project modules
+from drf_spectacular.utils import extend_schema
+
 from apps.projects.models import Project, Task
 from apps.projects.serializers import ProjectSerializer, TaskSerializer
 from apps.projects.permissions import IsProjectTeamMember
@@ -47,6 +49,11 @@ class ProjectsViewSet(ViewSet):
             return serializer_class(*args, **kwargs)
         return None
 
+    @extend_schema(
+        responses={200: ProjectSerializer(many=True)},
+        description="Retrieve a list of all projects.",
+        tags=["Projects"],
+    )
     def list(self, request: Request) -> Response:
         """
         List all projects.
@@ -62,6 +69,11 @@ class ProjectsViewSet(ViewSet):
             status=HTTP_200_OK,
         )
 
+    @extend_schema(
+        responses={200: ProjectSerializer, 404: None},
+        description="Retrieve a project by its ID.",
+        tags=["Projects"],
+    )
     def retrieve(self, requst: Request, pk: int) -> Response:
         """
         Retrieve a project by its ID.
@@ -81,11 +93,17 @@ class ProjectsViewSet(ViewSet):
             status=HTTP_200_OK,
         )
 
+    @extend_schema(
+        request=ProjectSerializer,
+        responses={201: ProjectSerializer, 400: None},
+        description="Create a new project.",
+        tags=["Projects"],
+    )
     def create(self, request: Request) -> Response:
         """
         Create a new project.
         """
-        serializer: ProjectSerializer = ProjectSerializer(request.data)
+        serializer: ProjectSerializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -103,6 +121,12 @@ class ProjectsViewSet(ViewSet):
             status=HTTP_400_BAD_REQUEST,
         )
 
+    @extend_schema(
+        request=ProjectSerializer,
+        responses={200: ProjectSerializer, 404: None, 400: None},
+        description="Update an existing project.",
+        tags=["Projects"],
+    )
     def update(self, request: Request, pk: int) -> Response:
         """
         Update an existing project.
@@ -134,6 +158,12 @@ class ProjectsViewSet(ViewSet):
             status=HTTP_400_BAD_REQUEST,
         )
 
+    @extend_schema(
+        request=ProjectSerializer,
+        responses={200: ProjectSerializer, 404: None, 400: None},
+        description="Partially update an existing project.",
+        tags=["Projects"],
+    )
     def partial_update(self, request: Request, pk: int) -> Response:
         """
         Partially update an existing project.
@@ -167,6 +197,11 @@ class ProjectsViewSet(ViewSet):
             status=HTTP_400_BAD_REQUEST,
         )
 
+    @extend_schema(
+        responses={204: None, 404: None},
+        description="Delete a project.",
+        tags=["Projects"],
+    )
     def destroy(self, request: Request, pk: int) -> Response:
         """
         Delete a project.
@@ -209,6 +244,11 @@ class TasksViewSet(ViewSet):
             return serializer_class(*args, **kwargs)
         return None
 
+    @extend_schema(
+        responses={200: TaskSerializer(many=True)},
+        description="List all tasks.",
+        tags=["Tasks"],
+    )
     def list(self, request: Request) -> Response:
         """
         List all tasks.
@@ -222,9 +262,15 @@ class TasksViewSet(ViewSet):
                 "tasks": serializer.data,
                 "count": tasks.count(),
                 "details": "Tasks fetched successfully!",
+                "status": HTTP_200_OK,
             }
         )
 
+    @extend_schema(
+        responses={200: TaskSerializer, 404: None},
+        description="Retrieve a task by its ID.",
+        tags=["Tasks"],
+    )
     def retrieve(self, request: Request, pk: int) -> Response:
         """
         Reetrieve a task by its ID.
@@ -246,12 +292,18 @@ class TasksViewSet(ViewSet):
             status=HTTP_200_OK,
         )
 
+    @extend_schema(
+        request=TaskSerializer,
+        responses={201: TaskSerializer, 400: None},
+        description="Create a new task.",
+        tags=["Tasks"],
+    )
     def create(self, request: Request) -> Response:
         """
         Create a new task.
         """
 
-        serializer: TaskSerializer = TaskSerializer(request.data)
+        serializer: TaskSerializer = TaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -269,6 +321,12 @@ class TasksViewSet(ViewSet):
             status=HTTP_400_BAD_REQUEST,
         )
 
+    @extend_schema(
+        request=TaskSerializer,
+        responses={200: TaskSerializer, 404: None, 400: None},
+        description="Update an existing task.",
+        tags=["Tasks"],
+    )
     def update(self, request: Request, pk: int) -> Response:
         """
         Update an existing task.
@@ -298,9 +356,15 @@ class TasksViewSet(ViewSet):
                 "errors": serializer.errors,
                 "details": "Task update failed!",
             },
-            status=HTTP_400_BAD_REQUEST,    
+            status=HTTP_400_BAD_REQUEST,
         )
-    
+
+    @extend_schema(
+        request=TaskSerializer,
+        responses={200: TaskSerializer, 404: None, 400: None},
+        description="Partially update an existing task.",
+        tags=["Tasks"],
+    )
     def partial_update(self, request: Request, pk: int) -> Response:
         """
         Partially update an existing task.
@@ -330,9 +394,14 @@ class TasksViewSet(ViewSet):
                 "errors": serializer.errors,
                 "details": "Task partial update failed!",
             },
-            status=HTTP_400_BAD_REQUEST,    
+            status=HTTP_400_BAD_REQUEST,
         )
-    
+
+    @extend_schema(
+        responses={204: None, 404: None},
+        description="Delete a task by its ID.",
+        tags=["Tasks"],
+    )
     def destroy(self, request: Request, pk: int) -> Response:
         """
         Delete a task
