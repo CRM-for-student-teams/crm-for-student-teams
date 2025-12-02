@@ -1,6 +1,8 @@
+# Django modules
 from django.contrib import admin
 from django.urls import path, include
 
+# DRF modules
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -23,7 +25,5 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    path("users/", include("apps.teams.urls")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/", include("apps.projects.urls")),
-] + debug_toolbar_urls()
+    path("api/", include("apps.teams.urls"))
+]

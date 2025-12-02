@@ -1,3 +1,4 @@
+# Django modules
 from django.db.models import (
     Model,
     IntegerField,
@@ -11,6 +12,7 @@ from django.db.models import (
 from django.conf import settings
 from django.utils import timezone
 
+# Project modules
 from apps.teams.models import Team, CustomUser
 
 

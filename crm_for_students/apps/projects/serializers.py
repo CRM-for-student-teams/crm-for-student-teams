@@ -1,8 +1,10 @@
+# DRF modules
 from rest_framework.serializers import (
     ModelSerializer,
     PrimaryKeyRelatedField,
 )
 
+# Project modules
 from apps.projects.models import Project, Task
 from apps.teams.models import Team, CustomUser
 from apps.teams.serializers import TeamSerializer, CustomUserSerializer

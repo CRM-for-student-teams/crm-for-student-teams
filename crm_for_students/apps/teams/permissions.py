@@ -1,16 +1,14 @@
 # DRF modules
-from email import message
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.views import View
-
+# Project modules
 from apps.teams.models import TeamMembership
 
 class IsTeamCaptain(BasePermission):
     """
     Permission to check if user is the team captain or not
     """
-    message = "Only team captain can perform this action"
 
     def has_object_permission(self, request: Request, view: View, obj):
         if hasattr(obj, "id"):
@@ -29,9 +27,8 @@ class IsTeamMember(BasePermission):
     """
     Permission to check if user is the team member
     """
-    message = "You must be in the team"
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request: Request, view: View, obj):
         if hasattr(obj, "members"):
             return obj.members.filter(id=request.user.id).exists()
         if hasattr(obj,"team"):

@@ -1,7 +1,10 @@
+# Django modules
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
+# Python modules
 from decouple import config
+# Project modules
 from settings.config import *  # noqa F403
 
 ROOT_URLCONF = "settings.urls"
@@ -50,10 +53,6 @@ CHANNEL_LAYERS = {
 
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
-
-REST_FRAMEWORK = {
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
 
 
 # ----------------------------------------------------------------

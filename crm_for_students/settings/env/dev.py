@@ -1,5 +1,7 @@
+# Python modules
 from decouple import config
 
+# Project modules
 from settings.base import *  # noqa
 
 DEBUG = True
