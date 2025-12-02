@@ -40,10 +40,6 @@ THIRD_PARTY_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
 
-REST_FRAMEWORK = {
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
 
 # ----------------------------------------------------------------
 # Middleware | Templates | Validators
