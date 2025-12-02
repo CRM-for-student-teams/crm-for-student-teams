@@ -99,7 +99,7 @@ class ProjectsViewSet(ViewSet):
         """
         Create a new project.
         """
-        serializer: ProjectSerializer = ProjectSerializer(request.data)
+        serializer: ProjectSerializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -299,7 +299,7 @@ class TasksViewSet(ViewSet):
         Create a new task.
         """
 
-        serializer: TaskSerializer = TaskSerializer(request.data)
+        serializer: TaskSerializer = TaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(

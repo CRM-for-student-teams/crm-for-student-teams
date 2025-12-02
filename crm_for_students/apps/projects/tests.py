@@ -16,6 +16,8 @@ from apps.projects.conftest import project, task
 def test_project_list():
     pass
 
+def test_project_list_unathenticated(api_client):
+    
 def test_project_fetch():
     pass
 
