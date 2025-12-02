@@ -15,7 +15,7 @@ from conftest import (
 
 @fixture
 def team(db, user_student_captain) -> Team:
-    team = Team.objects.create(
+    team: Team = Team.objects.create(
         name="Test Team",
         description="A team for testing purposes",
     )
