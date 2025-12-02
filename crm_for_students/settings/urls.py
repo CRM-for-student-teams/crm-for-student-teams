@@ -19,7 +19,8 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularRedocView,
-    SpectacularSwaggerView
+    SpectacularSwaggerView,
+    SpectacularAPIView
 )
 
 urlpatterns = [
@@ -35,4 +36,5 @@ urlpatterns = [
         name="redoc",
     ),
     path("users/", include("apps.teams.urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
 ]
