@@ -25,6 +25,7 @@ DJANGO_APPS = [
 PROJECT_APPS = [
     "apps.projects",
     "apps.teams",
+    "apps.chat"
 ]
 THIRD_PARTY_APPS = [
     "rest_framework",
@@ -34,7 +35,19 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "debug_toolbar",
+    "channels",
+    "channels_redis",
 ]
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
 
