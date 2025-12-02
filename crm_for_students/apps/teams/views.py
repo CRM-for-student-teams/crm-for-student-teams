@@ -9,9 +9,7 @@ from django.shortcuts import get_object_or_404
 # DRF modules
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
-from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
@@ -21,16 +19,14 @@ from rest_framework.status import (
     HTTP_204_NO_CONTENT,
 )
 from drf_spectacular.utils import (
-    extend_schema, 
-    OpenApiParameter, 
-    OpenApiExample, 
+    extend_schema,
+    OpenApiParameter,
+    OpenApiExample,
     OpenApiResponse,
 )
 
 # Project modules
-from apps.teams.models import Team, TeamMembership, CustomUser
-from apps.projects.serializers import ProjectSerializer, TaskSerializer
-from apps.projects.permissions import IsProjectTeamMember
+from apps.teams.models import Team, TeamMembership
 from apps.teams.permissions import IsTeamCaptain, IsTeamMember
 from apps.teams.serializers import TeamListSerializer, TeamMembershipSerialier, TeamSerializer
 
@@ -59,7 +55,7 @@ class TeamViewSet(ViewSet):
 
     @extend_schema(
         summary="List all teams",
-        description="Returns a list of all teams. Available to all authenticated users.",
+        description="Returns a list of all teams",
         tags=["Teams"],
         responses={200: TeamListSerializer(many=True)},
     )
@@ -71,7 +67,7 @@ class TeamViewSet(ViewSet):
 
     @extend_schema(
         summary="Retrieve team",
-        description="Returns detailed information about a specific team.",
+        description="Returns detailed information about a specific team",
         tags=["Teams"],
         responses={200: TeamSerializer},
     )
@@ -79,7 +75,6 @@ class TeamViewSet(ViewSet):
         team = self.get_object(pk)
         serializer = TeamSerializer(team)
         return Response(serializer.data)
-
 
     @extend_schema(
         summary="Create a team",
@@ -89,9 +84,9 @@ class TeamViewSet(ViewSet):
         responses={201: TeamSerializer},
     )
     def create(self, request):
-        serializer = TeamSerializer(data=request.data, context={"request": request})
+        serializer = TeamSerializer(
+            data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-
 
         team = serializer.save()
 
@@ -113,8 +108,9 @@ class TeamViewSet(ViewSet):
         team = self.get_object(pk)
 
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(team, data=request.data, context={'request': request})
-    
+        serializer = serializer_class(
+            team, data=request.data, context={'request': request})
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -151,7 +147,8 @@ class TeamViewSet(ViewSet):
     @action(detail=False, methods=["get"])
     def my_teams(self, request):
         teams = Team.objects.filter(members=request.user)
-        serializer = TeamListSerializer(teams, many=True, context={"request": request})
+        serializer = TeamListSerializer(
+            teams, many=True, context={"request": request})
         return Response(serializer.data)
 
     @extend_schema(
@@ -196,7 +193,7 @@ class TeamViewSet(ViewSet):
                 {"error": "You are not a member of this team."},
                 status=400
             )
- 
+
 
 class TeamMembershipViewSet(ViewSet):
     serializer_class = TeamMembershipSerialier
@@ -257,7 +254,7 @@ class TeamMembershipViewSet(ViewSet):
 
         is_captain = TeamMembership.objects.filter(
             team=team,
-            user=request.user,  
+            user=request.user,
             role="student_captain",
         ).exists()
 
@@ -290,7 +287,8 @@ class TeamMembershipViewSet(ViewSet):
     )
     def partial_update(self, request, pk=None):
         membership = self.get_object(pk)
-        serializer = self.serializer_class(membership, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            membership, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
