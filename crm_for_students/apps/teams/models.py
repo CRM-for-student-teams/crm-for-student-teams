@@ -5,7 +5,7 @@ from typing import Any
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-from django.contrib.auth.models import(
+from django.contrib.auth.models import (
     BaseUserManager,
     AbstractBaseUser,
     PermissionsMixin,
@@ -18,25 +18,24 @@ class CustomUserManager(BaseUserManager):
     """
     Custom user manager to make database requests
     """
+
     def __obtain_user_instance(
         self,
         email: str,
         full_name: str,
-        password: str, 
+        password: str,
         **kwargs: dict[str, Any],
     ):
         if not email:
-            raise ValidationError(
-                message="Email field is required"
-            )
-        new_user: 'CustomUser' = self.model(
+            raise ValidationError(message="Email field is required")
+        new_user: "CustomUser" = self.model(
             email=self.normalize_email(email),
             password=password,
             full_name=full_name,
             **kwargs,
         )
         return new_user
-    
+
     def create_user(
         self,
         email: str,
@@ -53,7 +52,7 @@ class CustomUserManager(BaseUserManager):
         new_user.set_password(password)
         new_user.save(using=self._db)
         return new_user
-    
+
     def create_superuser(
         self,
         email: str,
@@ -68,7 +67,7 @@ class CustomUserManager(BaseUserManager):
             **{
                 "is_staff": True,
                 "is_superuser": True,
-            **kwargs,
+                **kwargs,
             },
         )
         new_superuser.set_password(password)
@@ -85,7 +84,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ("student_captain", "Student Captain"),
         ("student_member", "Student Member"),
         ("client", "Client"),
-
     ]
 
     ROLE_MAX_LENGHT: int = 50
@@ -119,6 +117,7 @@ class Team(models.Model):
     """
     Represents a team within the system.
     """
+
     NAME_MAX_LENGHT: int = 200
 
     name = models.CharField(max_length=NAME_MAX_LENGHT)
@@ -126,7 +125,10 @@ class Team(models.Model):
     inserted_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     members = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, through="TeamMembership", related_name="teams", verbose_name="members"
+        settings.AUTH_USER_MODEL,
+        through="TeamMembership",
+        related_name="teams",
+        verbose_name="members",
     )
 
     class Meta:
@@ -146,10 +148,10 @@ class TeamMembership(models.Model):
     ROLE_CHOICES: list[tuple[str, str]] = [
         ("student_captain", "Student Captain"),
         ("student_member", "Student Member"),
-        ("client", "Client")
+        ("client", "Client"),
     ]
     ROLE_MAX_LENGHT: int = 50
-    
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     role = models.CharField(max_length=ROLE_MAX_LENGHT, choices=ROLE_CHOICES)

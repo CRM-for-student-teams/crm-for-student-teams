@@ -10,10 +10,9 @@ from django.db.models import (
     SET_NULL,
 )
 from django.conf import settings
-from django.utils import timezone
 
 # Project modules
-from apps.teams.models import Team, CustomUser
+from apps.teams.models import Team
 
 
 NAME_MAX_LENGTH: int = 100

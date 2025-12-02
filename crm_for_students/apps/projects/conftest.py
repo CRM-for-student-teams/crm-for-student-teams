@@ -2,15 +2,6 @@ from pytest import fixture
 
 from apps.projects.models import Project, Task
 from apps.teams.models import Team, TeamMembership
-from conftest import (
-    api_client,
-    auth_client_client,
-    auth_client_student_captain,
-    auth_client_student_member,
-    user_client,
-    user_student_captain,
-    user_student_member,
-)
 
 
 @fixture

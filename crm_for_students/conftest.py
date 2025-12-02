@@ -1,5 +1,7 @@
 from pytest import fixture
 
+from rest_framework.test import APIClient
+
 from apps.teams.models import CustomUser
 
 # ---------------------------------------------------------------------------
@@ -40,8 +42,6 @@ def user_student_captain(db):
 # API Client
 @fixture
 def api_client():
-    from rest_framework.test import APIClient
-
     return APIClient()
 
 

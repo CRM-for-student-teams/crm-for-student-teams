@@ -1,9 +1,3 @@
-# Python modules
-from typing import Any
-
-# Django modules
-from django.db.models.query import QuerySet
-
 # DRF modules
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated

@@ -7,9 +7,7 @@ from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
     SpectacularSwaggerView,
-    SpectacularAPIView
 )
-from debug_toolbar.toolbar import debug_toolbar_urls
 
 
 urlpatterns = [
@@ -25,8 +23,13 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    path("api/", include([
-        path("", include("apps.teams.urls")),
-        path("", include("apps.projects.urls")),
-    ])),
+    path(
+        "api/",
+        include(
+            [
+                path("", include("apps.teams.urls")),
+                path("", include("apps.projects.urls")),
+            ]
+        ),
+    ),
 ]

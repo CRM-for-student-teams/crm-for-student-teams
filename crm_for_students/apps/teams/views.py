@@ -1,9 +1,5 @@
-# Python modules
-from typing import Any
-
 # Django modules
 from django.core.exceptions import PermissionDenied
-from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 
 # DRF modules
@@ -11,42 +7,39 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_200_OK,
-    HTTP_404_NOT_FOUND,
-    HTTP_400_BAD_REQUEST,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-)
+from rest_framework.status import HTTP_204_NO_CONTENT
 from drf_spectacular.utils import (
     extend_schema,
-    OpenApiParameter,
-    OpenApiExample,
     OpenApiResponse,
 )
+from rest_framework.request import Request
 
 # Project modules
 from apps.teams.models import Team, TeamMembership
 from apps.teams.permissions import IsTeamCaptain, IsTeamMember
-from apps.teams.serializers import TeamListSerializer, TeamMembershipSerialier, TeamSerializer
+from apps.teams.serializers import (
+    TeamListSerializer,
+    TeamMembershipSerialier,
+    TeamSerializer,
+)
 
 
 class TeamViewSet(ViewSet):
     serializer_class = TeamSerializer
     queryset = Team.objects.all()
 
-    def get_queryset(self):
+    def get_queryset(self) -> "QuerySet[Team]":
         return Team.objects.all()
 
-    def get_object(self, pk):
+    def get_object(self, pk: int) -> Team:
         return get_object_or_404(Team, pk=pk)
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type:
         if self.action == "list":
             return TeamListSerializer
         return TeamSerializer
 
-    def get_permissions(self):
+    def get_permissions(self) -> list:
         if self.action in ["update", "partial_update", "destroy"]:
             return [IsAuthenticated(), IsTeamCaptain()]
         elif self.action == "retrieve":
@@ -59,7 +52,7 @@ class TeamViewSet(ViewSet):
         tags=["Teams"],
         responses={200: TeamListSerializer(many=True)},
     )
-    def list(self, request):
+    def list(self, request: Request) -> Response:
         teams = self.get_queryset()
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(teams, many=True)
@@ -71,7 +64,7 @@ class TeamViewSet(ViewSet):
         tags=["Teams"],
         responses={200: TeamSerializer},
     )
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
         self.check_object_permissions(request, team)
         serializer = TeamSerializer(team)
@@ -84,17 +77,14 @@ class TeamViewSet(ViewSet):
         request=TeamSerializer,
         responses={201: TeamSerializer},
     )
-    def create(self, request):
-        serializer = TeamSerializer(
-            data=request.data, context={"request": request})
+    def create(self, request: Request) -> Response:
+        serializer = TeamSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
         team = serializer.save()
 
         TeamMembership.objects.create(
-            team=team,
-            user=request.user,
-            role="student_captain"
+            team=team, user=request.user, role="student_captain"
         )
 
         return Response(serializer.data, status=201)
@@ -105,13 +95,14 @@ class TeamViewSet(ViewSet):
         request=TeamSerializer,
         responses={200: TeamSerializer},
     )
-    def update(self, request, pk=None):
+    def update(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
         self.check_object_permissions(request, team)
 
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(
-            team, data=request.data, context={'request': request})
+            team, data=request.data, context={"request": request}
+        )
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -123,7 +114,7 @@ class TeamViewSet(ViewSet):
         request=TeamSerializer,
         responses={200: TeamSerializer},
     )
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
         self.check_object_permissions(request, team)
         serializer = TeamSerializer(team, data=request.data, partial=True)
@@ -136,7 +127,7 @@ class TeamViewSet(ViewSet):
         tags=["Teams"],
         responses={204: None},
     )
-    def destroy(self, request, pk=None):
+    def destroy(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
         self.check_object_permissions(request, team)
 
@@ -150,15 +141,16 @@ class TeamViewSet(ViewSet):
         responses={200: TeamListSerializer(many=True)},
     )
     @action(detail=False, methods=["get"])
-    def my_teams(self, request):
+    def my_teams(self, request: Request) -> Response:
         teams = Team.objects.filter(members=request.user)
-        serializer = TeamListSerializer(
-            teams, many=True, context={"request": request})
+        serializer = TeamListSerializer(teams, many=True, context={"request": request})
         return Response(serializer.data)
 
     @extend_schema(
         summary="Leave a team",
-        description="Allows a user to leave a team. Captains cannot leave their team",
+        description=(
+            "Allows a user to leave a team. " "Captains cannot leave their team"
+        ),
         request=None,
         tags=["Teams"],
         responses={
@@ -167,7 +159,7 @@ class TeamViewSet(ViewSet):
         },
     )
     @action(detail=True, methods=["post"])
-    def leave_team(self, request, pk=None):
+    def leave_team(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
 
         is_captain = TeamMembership.objects.filter(
@@ -178,26 +170,18 @@ class TeamViewSet(ViewSet):
 
         if is_captain:
             return Response(
-                {"error": "The team captain cannot leave the team."},
-                status=400
+                {"error": "The team captain cannot leave the team."}, status=400
             )
 
         try:
-            membership = TeamMembership.objects.get(
-                team=team,
-                user=request.user
-            )
+            membership = TeamMembership.objects.get(team=team, user=request.user)
             membership.delete()
 
             return Response(
-                {"message": "You have successfully left the team."},
-                status=200
+                {"message": "You have successfully left the team."}, status=200
             )
         except TeamMembership.DoesNotExist:
-            return Response(
-                {"error": "You are not a member of this team."},
-                status=400
-            )
+            return Response({"error": "You are not a member of this team."}, status=400)
 
 
 class TeamMembershipViewSet(ViewSet):
@@ -210,17 +194,17 @@ class TeamMembershipViewSet(ViewSet):
         description="Retrieve permissions depending on action",
         tags=["Permissions"],
     )
-    def get_permissions(self):
+    def get_permissions(self) -> list:
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return [IsAuthenticated(), IsTeamCaptain()]
         elif self.action in ["list", "retrieve"]:
             return [IsAuthenticated(), IsTeamMember()]
         return [IsAuthenticated()]
 
-    def get_queryset(self):
+    def get_queryset(self) -> "QuerySet[TeamMembership]":
         return TeamMembership.objects.all()
 
-    def get_object(self, pk):
+    def get_object(self, pk: int) -> TeamMembership:
         return get_object_or_404(TeamMembership, pk=pk)
 
     @extend_schema(
@@ -229,7 +213,7 @@ class TeamMembershipViewSet(ViewSet):
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier(many=True)},
     )
-    def list(self, request):
+    def list(self, request: Request) -> Response:
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
@@ -240,7 +224,7 @@ class TeamMembershipViewSet(ViewSet):
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier},
     )
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request: Request, pk: int = None) -> Response:
         membership = self.get_object(pk)
         self.check_object_permissions(request, membership)
 
@@ -254,7 +238,7 @@ class TeamMembershipViewSet(ViewSet):
         tags=["TeamMembership"],
         responses={201: TeamMembershipSerialier},
     )
-    def create(self, request):
+    def create(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         team = serializer.validated_data["team"]
@@ -278,7 +262,7 @@ class TeamMembershipViewSet(ViewSet):
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier},
     )
-    def update(self, request, pk=None):
+    def update(self, request: Request, pk: int = None) -> Response:
         membership = self.get_object(pk)
         self.check_object_permissions(request, membership)
 
@@ -294,12 +278,11 @@ class TeamMembershipViewSet(ViewSet):
         tags=["TeamMembership"],
         responses={200: TeamMembershipSerialier},
     )
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request: Request, pk: int = None) -> Response:
         membership = self.get_object(pk)
         self.check_object_permissions(request, membership)
 
-        serializer = self.serializer_class(
-            membership, data=request.data, partial=True)
+        serializer = self.serializer_class(membership, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -310,7 +293,7 @@ class TeamMembershipViewSet(ViewSet):
         tags=["TeamMembership"],
         responses={204: None},
     )
-    def destroy(self, request, pk=None):
+    def destroy(self, request: Request, pk: int = None) -> Response:
         membership = self.get_object(pk)
         self.check_object_permissions(request, membership)
 
