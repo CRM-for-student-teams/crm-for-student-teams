@@ -1,7 +1,10 @@
+# Django modules
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
+# Python modules
 from decouple import config
+# Project modules
 from settings.config import *  # noqa F403
 
 ROOT_URLCONF = "settings.urls"

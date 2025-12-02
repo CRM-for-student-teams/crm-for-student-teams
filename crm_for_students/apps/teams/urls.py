@@ -1,4 +1,6 @@
+#Django modules
 from django.urls import path, include
+# DRF modules
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from drf_spectacular.views import (

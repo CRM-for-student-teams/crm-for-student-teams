@@ -1,11 +1,15 @@
+# DRF modules
 from rest_framework.serializers import (
     ModelSerializer, 
     CharField,
     ValidationError,
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+# Django modules
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+
 
 User = get_user_model()
 

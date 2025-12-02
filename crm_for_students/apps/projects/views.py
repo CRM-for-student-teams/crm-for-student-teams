@@ -1,7 +1,10 @@
+# Python modules
 from typing import Any
 
+# Django modules
 from django.db.models.query import QuerySet
 
+# DRF modules
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -14,6 +17,7 @@ from rest_framework.status import (
     HTTP_204_NO_CONTENT,
 )
 
+# Project modules
 from apps.projects.models import Project, Task
 from apps.projects.serializers import ProjectSerializer, TaskSerializer
 from apps.projects.permissions import IsProjectTeamMember

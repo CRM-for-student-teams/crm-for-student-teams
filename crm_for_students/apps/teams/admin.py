@@ -1,10 +1,9 @@
 # Django modules
 from django.contrib import admin
 
-from apps.common.admin import BaseModelAdmin
-
 # Project modules
 from .models import CustomUser, Team, TeamMembership
+from apps.common.admin import BaseModelAdmin
 
 
 class TeamMembershipInline(admin.TabularInline):

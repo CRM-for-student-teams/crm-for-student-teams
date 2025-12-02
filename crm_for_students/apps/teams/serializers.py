@@ -1,4 +1,4 @@
-from unittest.util import _count_diff_all_purpose
+# DRF modules
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
@@ -8,6 +8,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
 )
 
+# Project modules
 from apps.teams.models import CustomUser, Team, TeamMembership
 
 

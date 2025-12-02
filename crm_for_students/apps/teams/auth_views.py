@@ -1,9 +1,12 @@
+# Django modules
+from django.contrib.auth import get_user_model
+
+# DRF modules
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
@@ -12,13 +15,13 @@ from rest_framework.status import (
     HTTP_204_NO_CONTENT,
 )
 
+# Project modules
 from .auth_serializers import (
     UserRegistrationSerializer,
     UserSerializer,
     CustomTokenObtainPairSerializer,
 )
 
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 

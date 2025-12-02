@@ -1,5 +1,6 @@
+# Django modules
 from django.contrib import admin
-
+# Project modules
 from apps.common.admin import BaseModelAdmin
 from .models import Project, Task
 

@@ -1,10 +1,12 @@
+# Python modules
 from typing import Any
 
+# Django modules
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import action
 
+# DRF modules
+from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
@@ -18,6 +20,7 @@ from rest_framework.status import (
     HTTP_204_NO_CONTENT,
 )
 
+# Project modules
 from apps.teams.models import Team, TeamMembership, CustomUser
 from apps.projects.serializers import ProjectSerializer, TaskSerializer
 from apps.projects.permissions import IsProjectTeamMember
