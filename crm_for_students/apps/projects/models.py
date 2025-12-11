@@ -15,8 +15,8 @@ from django.conf import settings
 from apps.teams.models import Team
 
 
-NAME_MAX_LENGTH: int = 100
-TITLE_MAX_LENGTH: int = 100
+NAME_MAX_LENGTH = 100
+TITLE_MAX_LENGTH = 100
 
 
 class Project(Model):
@@ -36,6 +36,10 @@ class Project(Model):
     updated_at = DateTimeField(auto_now=True)
 
     class Meta:
+        """
+        Docstring for Meta
+        """
+
         db_table = "projects"
         verbose_name = "Project"
         verbose_name_plural = "Projects"
@@ -49,27 +53,27 @@ class Task(Model):
     Model representing a task within a project.
     """
 
-    LOW_I: int = 1
-    MEDIUM_I: int = 2
-    HIGH_I: int = 3
-    LOW: str = "Low"
-    MEDIUM: str = "Medium"
-    HIGH: str = "High"
+    LOW_I = 1
+    MEDIUM_I = 2
+    HIGH_I = 3
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
 
-    PRIORITY_CHOICES: tuple[tuple[int, str]] = (
+    PRIORITY_CHOICES = (
         (LOW_I, LOW),
         (MEDIUM_I, MEDIUM),
         (HIGH_I, HIGH),
     )
 
-    TODO_I: int = 1
-    IN_PROGRESS_I: int = 2
-    DONE_I: int = 3
-    TODO: str = "To Do"
-    IN_PROGRESS: str = "In Progress"
-    DONE: str = "Done"
+    TODO_I = 1
+    IN_PROGRESS_I = 2
+    DONE_I = 3
+    TODO = "To Do"
+    IN_PROGRESS = "In Progress"
+    DONE = "Done"
 
-    STATUS_CHOICES: tuple[tuple[int, str]] = (
+    STATUS_CHOICES = (
         (TODO_I, TODO),
         (IN_PROGRESS_I, IN_PROGRESS),
         (DONE_I, DONE),
@@ -102,12 +106,29 @@ class Task(Model):
     updated_at = DateTimeField(auto_now=True)
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         db_table = "tasks"
         verbose_name = "Task"
         verbose_name_plural = "Tasks"
 
     def __str__(self) -> str:
+        """
+        Docstring for __str__
+
+        :param self: Description
+        :return: Description
+        :rtype: str
+        """
         return f"{self.title} ({self.get_status_display()})"
 
     def get_status_display(self) -> str:
+        """
+        Docstring for get_status_display
+
+        :param self: Description
+        :return: Description
+        :rtype: str
+        """
         return dict(self.STATUS_CHOICES).get(self.status, "Unknown")
