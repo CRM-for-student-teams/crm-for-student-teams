@@ -1,6 +1,7 @@
 # Django modules
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from django.db.models import QuerySet
 
 # DRF modules
 from rest_framework.decorators import action
@@ -28,7 +29,7 @@ class TeamViewSet(ViewSet):
     serializer_class = TeamSerializer
     queryset = Team.objects.all()
 
-    def get_queryset(self) -> "QuerySet[Team]":
+    def get_queryset(self) -> QuerySet[Team]:
         return Team.objects.all()
 
     def get_object(self, pk: int) -> Team:
@@ -53,7 +54,9 @@ class TeamViewSet(ViewSet):
         responses={200: TeamListSerializer(many=True)},
     )
     def list(self, request: Request) -> Response:
-        teams = self.get_queryset()
+        teams = self.get_queryset().prefetch_related(
+            "members", "teammembership_set__user"
+        )
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(teams, many=True)
         return Response(serializer.data)
@@ -65,7 +68,9 @@ class TeamViewSet(ViewSet):
         responses={200: TeamSerializer},
     )
     def retrieve(self, request: Request, pk: int = None) -> Response:
-        team = self.get_object(pk)
+        team = get_object_or_404(
+            Team.objects.prefetch_related("members", "teammembership_set__user"), pk=pk
+        )
         self.check_object_permissions(request, team)
         serializer = TeamSerializer(team)
         return Response(serializer.data)
@@ -201,7 +206,7 @@ class TeamMembershipViewSet(ViewSet):
             return [IsAuthenticated(), IsTeamMember()]
         return [IsAuthenticated()]
 
-    def get_queryset(self) -> "QuerySet[TeamMembership]":
+    def get_queryset(self) -> QuerySet[TeamMembership]:
         return TeamMembership.objects.all()
 
     def get_object(self, pk: int) -> TeamMembership:
@@ -214,7 +219,7 @@ class TeamMembershipViewSet(ViewSet):
         responses={200: TeamMembershipSerialier(many=True)},
     )
     def list(self, request: Request) -> Response:
-        queryset = self.get_queryset()
+        queryset = self.get_queryset().select_related("user", "team")
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 

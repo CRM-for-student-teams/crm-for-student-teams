@@ -17,6 +17,9 @@ class ProjectSerializer(ModelSerializer):
     team = PrimaryKeyRelatedField(queryset=Team.objects.all(), write_only=True)
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         model = Project
         fields = [
             "id",
@@ -45,6 +48,9 @@ class TaskSerializer(ModelSerializer):
     project = PrimaryKeyRelatedField(queryset=Project.objects.all(), write_only=True)
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         model = Task
         fields = [
             "id",

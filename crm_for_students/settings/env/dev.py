@@ -11,6 +11,18 @@ ALLOWED_HOSTS = (
     else []
 )
 
+# Django Debug Toolbar
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
+
+# Show Django Debug Toolbar for all requests (including API)
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG,
+    "RENDER_PANELS": True,
+}
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",

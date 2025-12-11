@@ -52,7 +52,11 @@ class ProjectsViewSet(ViewSet):
         """
         List all projects.
         """
-        projects = Project.objects.all()
+        projects = (
+            Project.objects.select_related("team")
+            .prefetch_related("team__members", "team__teammembership_set__user")
+            .all()
+        )
         serializer: ProjectSerializer = ProjectSerializer(projects, many=True)
         return Response(
             data={
@@ -73,7 +77,11 @@ class ProjectsViewSet(ViewSet):
         Retrieve a project by its ID.
         """
         try:
-            project = Project.objects.get(id=pk)
+            project = (
+                Project.objects.select_related("team")
+                .prefetch_related("team__members", "team__teammembership_set__user")
+                .get(id=pk)
+            )
         except Project.DoesNotExist:
             return Response(
                 data={"details": "Project not found."}, status=HTTP_404_NOT_FOUND
@@ -248,7 +256,13 @@ class TasksViewSet(ViewSet):
         List all tasks.
         """
 
-        tasks = Task.objects.all()
+        tasks = (
+            Task.objects.select_related("executor", "project__team")
+            .prefetch_related(
+                "project__team__members", "project__team__teammembership_set__user"
+            )
+            .all()
+        )
         serializer: TaskSerializer = TaskSerializer(tasks, many=True)
 
         return Response(
@@ -271,7 +285,13 @@ class TasksViewSet(ViewSet):
         """
 
         try:
-            task = Task.objects.get(id=pk)
+            task = (
+                Task.objects.select_related("executor", "project__team")
+                .prefetch_related(
+                    "project__team__members", "project__team__teammembership_set__user"
+                )
+                .get(id=pk)
+            )
         except Task.DoesNotExist:
             return Response(
                 data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND

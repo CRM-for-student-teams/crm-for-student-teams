@@ -26,6 +26,19 @@ class CustomUserManager(BaseUserManager):
         password: str,
         **kwargs: dict[str, Any],
     ):
+        """
+        Docstring for __obtain_user_instance
+
+        :param self: Description
+        :param email: Description
+        :type email: str
+        :param full_name: Description
+        :type full_name: str
+        :param password: Description
+        :type password: str
+        :param kwargs: Description
+        :type kwargs: dict[str, Any]
+        """
         if not email:
             raise ValidationError(message="Email field is required")
         new_user: "CustomUser" = self.model(
@@ -43,6 +56,19 @@ class CustomUserManager(BaseUserManager):
         password: str,
         **kwargs: dict[str, Any],
     ):
+        """
+        Docstring for create_user
+
+        :param self: Description
+        :param email: Description
+        :type email: str
+        :param full_name: Description
+        :type full_name: str
+        :param password: Description
+        :type password: str
+        :param kwargs: Description
+        :type kwargs: dict[str, Any]
+        """
         new_user = self.__obtain_user_instance(
             email=email,
             password=password,
@@ -60,6 +86,19 @@ class CustomUserManager(BaseUserManager):
         password: str,
         **kwargs: dict[str, Any],
     ):
+        """
+        Docstring for create_superuser
+
+        :param self: Description
+        :param email: Description
+        :type email: str
+        :param full_name: Description
+        :type full_name: str
+        :param password: Description
+        :type password: str
+        :param kwargs: Description
+        :type kwargs: dict[str, Any]
+        """
         new_superuser = self.__obtain_user_instance(
             email=email,
             full_name=full_name,
@@ -80,21 +119,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     Represents a user in the system.
     """
 
-    ROLE_CHOICES: list[tuple[str, str]] = [
+    ROLE_CHOICES = [
         ("student_captain", "Student Captain"),
         ("student_member", "Student Member"),
         ("client", "Client"),
     ]
 
-    ROLE_MAX_LENGHT: int = 50
-    EMAIL_MAX_LENGHT: int = 150
-    PASSWORD_MAX_LENGHT: int = 200
-    FULLNAME_MAX_LENGHT: int = 240
+    ROLE_MAX_LENGTH = 50
+    EMAIL_MAX_LENGTH = 150
+    PASSWORD_MAX_LENGTH = 200
+    FULLNAME_MAX_LENGTH = 240
 
-    email = models.EmailField(max_length=EMAIL_MAX_LENGHT, unique=True)
-    password = models.CharField(max_length=200, validators=[validate_password])
-    full_name = models.CharField(max_length=FULLNAME_MAX_LENGHT)
-    role = models.CharField(max_length=ROLE_MAX_LENGHT, choices=ROLE_CHOICES)
+    email = models.EmailField(max_length=EMAIL_MAX_LENGTH, unique=True)
+    password = models.CharField(max_length=PASSWORD_MAX_LENGTH, validators=[validate_password])
+    full_name = models.CharField(max_length=FULLNAME_MAX_LENGTH)
+    role = models.CharField(max_length=ROLE_MAX_LENGTH, choices=ROLE_CHOICES)
     inserted_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -118,9 +157,9 @@ class Team(models.Model):
     Represents a team within the system.
     """
 
-    NAME_MAX_LENGHT: int = 200
+    NAME_MAX_LENGTH = 200
 
-    name = models.CharField(max_length=NAME_MAX_LENGHT)
+    name = models.CharField(max_length=NAME_MAX_LENGTH)
     description = models.TextField()
     inserted_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -132,11 +171,21 @@ class Team(models.Model):
     )
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         db_table = "team"
         verbose_name = "Team"
         verbose_name_plural = "Teams"
 
     def __str__(self) -> str:
+        """
+        Docstring for __str__
+
+        :param self: Description
+        :return: Description
+        :rtype: str
+        """
         return f"{self.name}"
 
 
@@ -145,23 +194,33 @@ class TeamMembership(models.Model):
     Intermediate model for linking users to teams with a specific role.
     """
 
-    ROLE_CHOICES: list[tuple[str, str]] = [
+    ROLE_CHOICES = [
         ("student_captain", "Student Captain"),
         ("student_member", "Student Member"),
         ("client", "Client"),
     ]
-    ROLE_MAX_LENGHT: int = 50
+    ROLE_MAX_LENGTH = 50
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    role = models.CharField(max_length=ROLE_MAX_LENGHT, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=ROLE_MAX_LENGTH, choices=ROLE_CHOICES)
     inserted_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         db_table = "team_membership"
         verbose_name = "Team membership"
         verbose_name_plural = "Teams membership"
 
     def __str__(self) -> str:
+        """
+        Docstring for __str__
+
+        :param self: Description
+        :return: Description
+        :rtype: str
+        """
         return f"{self.user.full_name} -> {self.team.name} (role: {self.role})"
