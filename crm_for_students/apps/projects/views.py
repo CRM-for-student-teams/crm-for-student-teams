@@ -44,7 +44,8 @@ class ProjectsViewSet(ViewSet):
         return None
 
     @extend_schema(
-        responses={200: ProjectSerializer(many=True)},
+        summary="List all projects",
+        responses={HTTP_200_OK: ProjectSerializer(many=True)},
         description="Retrieve a list of all projects.",
         tags=["Projects"],
     )
@@ -68,11 +69,12 @@ class ProjectsViewSet(ViewSet):
         )
 
     @extend_schema(
-        responses={200: ProjectSerializer, 404: None},
+        summary="Retrieve a project by ID",
+        responses={HTTP_200_OK: ProjectSerializer, HTTP_404_NOT_FOUND: None},
         description="Retrieve a project by its ID.",
         tags=["Projects"],
     )
-    def retrieve(self, requst: Request, pk: int) -> Response:
+    def retrieve(self, request: Request, pk: int) -> Response:
         """
         Retrieve a project by its ID.
         """
@@ -96,8 +98,9 @@ class ProjectsViewSet(ViewSet):
         )
 
     @extend_schema(
+        summary="Create a new project",
         request=ProjectSerializer,
-        responses={201: ProjectSerializer, 400: None},
+        responses={HTTP_201_CREATED: ProjectSerializer, HTTP_400_BAD_REQUEST: None},
         description="Create a new project.",
         tags=["Projects"],
     )
@@ -124,8 +127,13 @@ class ProjectsViewSet(ViewSet):
         )
 
     @extend_schema(
+        summary="Update an existing project",
         request=ProjectSerializer,
-        responses={200: ProjectSerializer, 404: None, 400: None},
+        responses={
+            HTTP_200_OK: ProjectSerializer,
+            HTTP_404_NOT_FOUND: None,
+            HTTP_400_BAD_REQUEST: None,
+        },
         description="Update an existing project.",
         tags=["Projects"],
     )
@@ -161,8 +169,13 @@ class ProjectsViewSet(ViewSet):
         )
 
     @extend_schema(
+        summary="Partially update an existing project",
         request=ProjectSerializer,
-        responses={200: ProjectSerializer, 404: None, 400: None},
+        responses={
+            HTTP_200_OK: ProjectSerializer,
+            HTTP_404_NOT_FOUND: None,
+            HTTP_400_BAD_REQUEST: None,
+        },
         description="Partially update an existing project.",
         tags=["Projects"],
     )
@@ -200,7 +213,8 @@ class ProjectsViewSet(ViewSet):
         )
 
     @extend_schema(
-        responses={204: None, 404: None},
+        summary="Delete a project",
+        responses={HTTP_204_NO_CONTENT: None, HTTP_404_NOT_FOUND: None},
         description="Delete a project.",
         tags=["Projects"],
     )
@@ -247,7 +261,8 @@ class TasksViewSet(ViewSet):
         return None
 
     @extend_schema(
-        responses={200: TaskSerializer(many=True)},
+        summary="List all tasks",
+        responses={HTTP_200_OK: TaskSerializer(many=True)},
         description="List all tasks.",
         tags=["Tasks"],
     )
@@ -270,18 +285,20 @@ class TasksViewSet(ViewSet):
                 "tasks": serializer.data,
                 "count": tasks.count(),
                 "details": "Tasks fetched successfully!",
-                "status": HTTP_200_OK,
-            }
+
+            },
+            status=HTTP_200_OK,
         )
 
     @extend_schema(
-        responses={200: TaskSerializer, 404: None},
+        summary="Retrieve a task by ID",
+        responses={HTTP_200_OK: TaskSerializer, HTTP_404_NOT_FOUND: None},
         description="Retrieve a task by its ID.",
         tags=["Tasks"],
     )
     def retrieve(self, request: Request, pk: int) -> Response:
         """
-        Reetrieve a task by its ID.
+        Retrieve a task by its ID.
         """
 
         try:
@@ -307,8 +324,9 @@ class TasksViewSet(ViewSet):
         )
 
     @extend_schema(
+        summary="Create a new task",
         request=TaskSerializer,
-        responses={201: TaskSerializer, 400: None},
+        responses={HTTP_201_CREATED: TaskSerializer, HTTP_400_BAD_REQUEST: None},
         description="Create a new task.",
         tags=["Tasks"],
     )
@@ -336,8 +354,13 @@ class TasksViewSet(ViewSet):
         )
 
     @extend_schema(
+        summary="Update an existing task",
         request=TaskSerializer,
-        responses={200: TaskSerializer, 404: None, 400: None},
+        responses={
+            HTTP_200_OK: TaskSerializer,
+            HTTP_404_NOT_FOUND: None,
+            HTTP_400_BAD_REQUEST: None,
+        },
         description="Update an existing task.",
         tags=["Tasks"],
     )
@@ -374,8 +397,13 @@ class TasksViewSet(ViewSet):
         )
 
     @extend_schema(
+        summary="Partially update an existing task",
         request=TaskSerializer,
-        responses={200: TaskSerializer, 404: None, 400: None},
+        responses={
+            HTTP_200_OK: TaskSerializer,
+            HTTP_404_NOT_FOUND: None,
+            HTTP_400_BAD_REQUEST: None,
+        },
         description="Partially update an existing task.",
         tags=["Tasks"],
     )
@@ -412,7 +440,8 @@ class TasksViewSet(ViewSet):
         )
 
     @extend_schema(
-        responses={204: None, 404: None},
+        summary="Delete a task",
+        responses={HTTP_204_NO_CONTENT: None, HTTP_404_NOT_FOUND: None},
         description="Delete a task by its ID.",
         tags=["Tasks"],
     )
