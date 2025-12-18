@@ -45,6 +45,13 @@ class Project(Model):
         verbose_name_plural = "Projects"
 
     def __str__(self) -> str:
+        """
+        Docstring for __str__
+
+        :param self: Description
+        :return: Description
+        :rtype: str
+        """
         return self.name
 
 

@@ -17,6 +17,9 @@ class CustomUserSerializer(ModelSerializer):
     """
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         model = CustomUser
         fields = [
             "id",
@@ -44,6 +47,9 @@ class TeamMembershipSerialier(ModelSerializer):
     team_name = CharField(source="team.name", read_only=True)
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         model = TeamMembership
         fields = [
             "id",
@@ -58,6 +64,12 @@ class TeamMembershipSerialier(ModelSerializer):
         read_only_fields = ["id", "inserted_at", "updated_at"]
 
     def validate(self, data):
+        """
+        Docstring for validate
+
+        :param self: Description
+        :param data: Description
+        """
         team = data.get("team")
         user = data.get("user")
 
@@ -81,6 +93,9 @@ class TeamSerializer(ModelSerializer):
     member_count = SerializerMethodField()
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         model = Team
         fields = [
             "id",
@@ -95,9 +110,22 @@ class TeamSerializer(ModelSerializer):
         read_only_field = ["id", "inserted_at", "updated_at"]
 
     def get_member_count(self, obj):
+        """
+        Gets the number of the team members
+
+        :param self: Description
+        :param obj: Description
+        """
         return obj.members.count()
 
     def create(self, validated_data):
+        """
+        Creates a teammembership object
+
+        :param self: Description
+        :param validated_data: Description
+        """
+
         request = self.context.get("request")
         team = Team.objects.create(**validated_data)
 
@@ -117,6 +145,9 @@ class TeamListSerializer(ModelSerializer):
     member_count = SerializerMethodField()
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         model = Team
         fields = [
             "id",
@@ -128,4 +159,10 @@ class TeamListSerializer(ModelSerializer):
         read_only_fields = fields
 
     def get_member_count(self, obj):
+        """
+        Retuns count of the members
+
+        :param self: Description
+        :param obj: Description
+        """
         return obj.members.count()

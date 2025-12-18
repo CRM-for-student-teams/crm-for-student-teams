@@ -41,6 +41,9 @@ class UserRegistrationSerializer(ModelSerializer):
     )
 
     class Meta:
+        """
+        Docstring for Meta
+        """
         model = User
         fields = [
             "email",
@@ -50,11 +53,29 @@ class UserRegistrationSerializer(ModelSerializer):
         ]
 
     def validate(self, attrs: dict) -> dict:
+        """
+        password validation
+
+        :param self: Description
+        :param attrs: Description
+        :type attrs: dict
+        :return: Description
+        :rtype: dict
+        """
         if attrs["password"] != attrs["password_confirm"]:
             raise ValidationError({"password": "Password fields should be match"})
         return attrs
 
     def create(self, validated_data: dict) -> User:
+        """
+        Docstring for create
+
+        :param self: Description
+        :param validated_data: Description
+        :type validated_data: dict
+        :return: Description
+        :rtype: Any
+        """
         validated_data.pop("password_confirm")
         user = User.objects.create_user(**validated_data)
         return user
@@ -65,9 +86,18 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     Custom token serializer
     """
 
-    username_field = "email"
+    username_field: str = "email"
 
     def validate(self, attrs: dict) -> dict:
+        """
+        Docstring for validate
+
+        :param self: Description
+        :param attrs: Description
+        :type attrs: dict
+        :return: Description
+        :rtype: dict
+        """
         data = super().validate(attrs)
 
         data["user"] = UserSerializer(self.user).data
