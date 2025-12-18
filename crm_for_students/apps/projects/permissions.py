@@ -15,7 +15,7 @@ class IsProjectTeamMember(BasePermission):
     def has_object_permission(self, request: Request, view: View, obj: Project) -> bool:
         """
         Docstring for has_object_permission
-        
+
         :param self: Description
         :param request: Description
         :type request: Request

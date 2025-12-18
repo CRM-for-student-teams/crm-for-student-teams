@@ -1,3 +1,21 @@
 [tool.pytest]
 min_version="9.0"
 python_path="."
+
+[tool.mypy]
+python_version = "3.11"
+files = ["apps", "settings"]
+
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Set to true once you've added types everywhere
+check_untyped_defs = true
+
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "."
+
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "settings.base"

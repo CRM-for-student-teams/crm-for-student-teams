@@ -66,7 +66,7 @@ class TeamMembershipSerialier(ModelSerializer):
     def validate(self, data):
         """
         Docstring for validate
-        
+
         :param self: Description
         :param data: Description
         """
@@ -112,7 +112,7 @@ class TeamSerializer(ModelSerializer):
     def get_member_count(self, obj):
         """
         Gets the number of the team members
-        
+
         :param self: Description
         :param obj: Description
         """
@@ -121,7 +121,7 @@ class TeamSerializer(ModelSerializer):
     def create(self, validated_data):
         """
         Creates a teammembership object
-        
+
         :param self: Description
         :param validated_data: Description
         """
@@ -161,7 +161,7 @@ class TeamListSerializer(ModelSerializer):
     def get_member_count(self, obj):
         """
         Retuns count of the members
-        
+
         :param self: Description
         :param obj: Description
         """

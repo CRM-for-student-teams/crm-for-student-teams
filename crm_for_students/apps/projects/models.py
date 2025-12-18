@@ -47,7 +47,7 @@ class Project(Model):
     def __str__(self) -> str:
         """
         Docstring for __str__
-        
+
         :param self: Description
         :return: Description
         :rtype: str

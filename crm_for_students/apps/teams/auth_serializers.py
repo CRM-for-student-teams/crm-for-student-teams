@@ -55,7 +55,7 @@ class UserRegistrationSerializer(ModelSerializer):
     def validate(self, attrs: dict) -> dict:
         """
         password validation
-        
+
         :param self: Description
         :param attrs: Description
         :type attrs: dict
@@ -69,7 +69,7 @@ class UserRegistrationSerializer(ModelSerializer):
     def create(self, validated_data: dict) -> User:
         """
         Docstring for create
-        
+
         :param self: Description
         :param validated_data: Description
         :type validated_data: dict
@@ -91,7 +91,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs: dict) -> dict:
         """
         Docstring for validate
-        
+
         :param self: Description
         :param attrs: Description
         :type attrs: dict
