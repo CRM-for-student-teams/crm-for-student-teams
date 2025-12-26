@@ -1,8 +1,21 @@
 from pytest import fixture
+from django.conf import settings
 
 from rest_framework.test import APIClient
 
 from apps.teams.models import CustomUser
+
+
+@fixture(scope="session", autouse=True)
+def disable_debug_toolbar():
+    """Disable debug_toolbar during tests to avoid static files issues."""
+    settings.DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: False}
+    # Remove debug toolbar middleware if present
+    if "debug_toolbar.middleware.DebugToolbarMiddleware" in settings.MIDDLEWARE:
+        settings.MIDDLEWARE = [
+            mw for mw in settings.MIDDLEWARE 
+            if mw != "debug_toolbar.middleware.DebugToolbarMiddleware"
+        ]
 
 # ---------------------------------------------------------------------------
 # Users

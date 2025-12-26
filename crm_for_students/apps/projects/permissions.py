@@ -27,3 +27,21 @@ class IsProjectTeamMember(BasePermission):
         :rtype: bool
         """
         return request.user in obj.team.members.all()
+
+
+class IsStudentCaptain(BasePermission):
+    """
+    Permission to only allow student captains to access projects.
+    """
+
+    def has_permission(self, request: Request, view: View) -> bool:
+        return request.user.is_authenticated and request.user.role == "student_captain"
+
+
+class IsStudentMember(BasePermission):
+    """
+    Permission to only allow student members to access tasks.
+    """
+
+    def has_permission(self, request: Request, view: View) -> bool:
+        return request.user.is_authenticated and request.user.role == "student_member"

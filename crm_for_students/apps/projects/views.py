@@ -16,7 +16,11 @@ from drf_spectacular.utils import extend_schema
 
 from apps.projects.models import Project, Task
 from apps.projects.serializers import ProjectSerializer, TaskSerializer
-from apps.projects.permissions import IsProjectTeamMember
+from apps.projects.permissions import (
+    IsProjectTeamMember,
+    IsStudentCaptain,
+    IsStudentMember,
+)
 
 
 class ProjectsViewSet(ViewSet):
@@ -27,9 +31,7 @@ class ProjectsViewSet(ViewSet):
     # --------------------------------------------------------------
     # for permission handling
     def get_permissions(self):
-        if self.action in ["update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsProjectTeamMember()]
-        return [IsAuthenticated()]
+        return [IsAuthenticated(), IsStudentCaptain()]
 
     # --------------------------------------------------------------
     # for the proper swagger ui and doc
@@ -244,9 +246,8 @@ class TasksViewSet(ViewSet):
     # --------------------------------------------------------------
     # for permission handling
     def get_permissions(self):
-        if self.action in ["update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsProjectTeamMember()]
-        return [IsAuthenticated()]
+        # All task actions require student_member role
+        return [IsAuthenticated(), IsStudentMember()]
 
     # --------------------------------------------------------------
     # for the proper swagger ui and doc
@@ -285,7 +286,6 @@ class TasksViewSet(ViewSet):
                 "tasks": serializer.data,
                 "count": tasks.count(),
                 "details": "Tasks fetched successfully!",
-
             },
             status=HTTP_200_OK,
         )
