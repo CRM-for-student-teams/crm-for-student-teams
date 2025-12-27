@@ -3,7 +3,7 @@ from django.contrib import admin
 
 # Project modules
 from .models import CustomUser, Team, TeamMembership
-from apps.common.admin import BaseModelAdmin
+from apps.commons.admin import BaseModelAdmin
 
 
 class TeamMembershipInline(admin.TabularInline):

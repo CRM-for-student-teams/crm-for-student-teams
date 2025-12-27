@@ -28,7 +28,8 @@ DJANGO_APPS = [
 PROJECT_APPS = [
     "apps.projects",
     "apps.teams",
-    "apps.chat"
+    "apps.chats",
+    "apps.commons"
 ]
 THIRD_PARTY_APPS = [
     "rest_framework",
