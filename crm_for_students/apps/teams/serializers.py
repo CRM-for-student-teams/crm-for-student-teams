@@ -5,6 +5,7 @@ from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     ValidationError,
     SerializerMethodField,
+    Serializer,
 )
 
 # Project modules
@@ -166,3 +167,21 @@ class TeamListSerializer(ModelSerializer):
         :param obj: Description
         """
         return obj.members.count()
+
+
+class ErrorResponseSerializer(Serializer):
+    """Serializer for error responses"""
+
+    detail = CharField(help_text="Error message describing what went wrong")
+
+    class Meta:
+        ref_name = "TeamErrorResponse"
+
+
+class ValidationErrorResponseSerializer(Serializer):
+    """Serializer for validation error responses"""
+
+    error = CharField(help_text="Validation error message")
+
+    class Meta:
+        ref_name = "TeamValidationErrorResponse"

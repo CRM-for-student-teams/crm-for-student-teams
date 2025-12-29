@@ -2,6 +2,8 @@
 from rest_framework.serializers import (
     ModelSerializer,
     PrimaryKeyRelatedField,
+    Serializer,
+    CharField,
 )
 
 # Project modules
@@ -66,3 +68,22 @@ class TaskSerializer(ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class ErrorResponseSerializer(Serializer):
+    """Serializer for error responses"""
+
+    detail = CharField(help_text="Error message describing what went wrong")
+
+    class Meta:
+        ref_name = "ProjectErrorResponse"
+
+
+class ValidationErrorResponseSerializer(Serializer):
+    """Serializer for validation error responses"""
+
+    errors = CharField(help_text="Validation errors")
+    detail = CharField(help_text="Error message")
+
+    class Meta:
+        ref_name = "ProjectValidationErrorResponse"

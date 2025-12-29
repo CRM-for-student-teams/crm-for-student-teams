@@ -12,12 +12,18 @@ from rest_framework.status import (
 )
 
 # Project modules
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 from apps.projects.models import Project, Task
-from apps.projects.serializers import ProjectSerializer, TaskSerializer
+from apps.projects.serializers import (
+    ProjectSerializer,
+    TaskSerializer,
+    ErrorResponseSerializer,
+    ValidationErrorResponseSerializer,
+)
+
 from apps.projects.permissions import (
-    IsProjectTeamMember,
     IsStudentCaptain,
     IsStudentMember,
 )
@@ -46,10 +52,38 @@ class ProjectsViewSet(ViewSet):
         return None
 
     @extend_schema(
+        operation_id="projects_list",
         summary="List all projects",
-        responses={HTTP_200_OK: ProjectSerializer(many=True)},
-        description="Retrieve a list of all projects.",
+        description="Retrieve a paginated list of all projects. Returns project details including team information and member count.",
         tags=["Projects"],
+        responses={HTTP_200_OK: ProjectSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "Success Response",
+                value={
+                    "projects": [
+                        {
+                            "id": 1,
+                            "name": "Mobile App Development",
+                            "description": "Building a cross-platform mobile application",
+                            "deadline": "2025-12-31T23:59:59Z",
+                            "team": 1,
+                            "team_detail": {
+                                "id": 1,
+                                "name": "Tech Innovators",
+                                "member_count": 5,
+                            },
+                            "created_at": "2025-01-01T10:00:00Z",
+                            "updated_at": "2025-01-15T14:30:00Z",
+                        }
+                    ],
+                    "count": 1,
+                    "details": "Projects fetched successfully!",
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
     )
     def list(self, request: Request) -> Response:
         """
@@ -71,10 +105,53 @@ class ProjectsViewSet(ViewSet):
         )
 
     @extend_schema(
+        operation_id="projects_retrieve",
         summary="Retrieve a project by ID",
-        responses={HTTP_200_OK: ProjectSerializer, HTTP_404_NOT_FOUND: None},
-        description="Retrieve a project by its ID.",
+        description="Get detailed information about a specific project including team members and tasks.",
         tags=["Projects"],
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the project",
+                required=True,
+            ),
+        ],
+        responses={
+            HTTP_200_OK: ProjectSerializer,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Success Response",
+                value={
+                    "project": {
+                        "id": 1,
+                        "name": "Mobile App Development",
+                        "description": "Building a cross-platform mobile application",
+                        "deadline": "2025-12-31T23:59:59Z",
+                        "team": 1,
+                        "team_detail": {
+                            "id": 1,
+                            "name": "Tech Innovators",
+                            "member_count": 5,
+                        },
+                        "created_at": "2025-01-01T10:00:00Z",
+                        "updated_at": "2025-01-15T14:30:00Z",
+                    },
+                    "details": "Project fetched successfully!",
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+            OpenApiExample(
+                "Not Found Error",
+                value={"detail": "Project not found."},
+                response_only=True,
+                status_codes=["404"],
+            ),
+        ],
     )
     def retrieve(self, request: Request, pk: int) -> Response:
         """
@@ -88,7 +165,7 @@ class ProjectsViewSet(ViewSet):
             )
         except Project.DoesNotExist:
             return Response(
-                data={"details": "Project not found."}, status=HTTP_404_NOT_FOUND
+                data={"detail": "Project not found."}, status=HTTP_404_NOT_FOUND
             )
         serializer: ProjectSerializer = ProjectSerializer(project)
         return Response(
@@ -100,11 +177,56 @@ class ProjectsViewSet(ViewSet):
         )
 
     @extend_schema(
+        operation_id="projects_create",
         summary="Create a new project",
-        request=ProjectSerializer,
-        responses={HTTP_201_CREATED: ProjectSerializer, HTTP_400_BAD_REQUEST: None},
-        description="Create a new project.",
+        description="Create a new project for a team. Only team captains can create projects.",
         tags=["Projects"],
+        request=ProjectSerializer,
+        responses={
+            HTTP_201_CREATED: ProjectSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Create Project Request",
+                value={
+                    "name": "Mobile App Development",
+                    "description": "Building a cross-platform mobile application",
+                    "deadline": "2025-12-31T23:59:59Z",
+                    "team": 1,
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Success Response",
+                value={
+                    "project": {
+                        "id": 1,
+                        "name": "Mobile App Development",
+                        "description": "Building a cross-platform mobile application",
+                        "deadline": "2025-12-31T23:59:59Z",
+                        "team": 1,
+                        "created_at": "2025-01-01T10:00:00Z",
+                        "updated_at": "2025-01-01T10:00:00Z",
+                    },
+                    "details": "Project created successfully!",
+                },
+                response_only=True,
+                status_codes=["201"],
+            ),
+            OpenApiExample(
+                "Validation Error",
+                value={
+                    "errors": {
+                        "name": ["This field is required."],
+                        "team": ["This field is required."],
+                    },
+                    "detail": "Project creation failed!",
+                },
+                response_only=True,
+                status_codes=["400"],
+            ),
+        ],
     )
     def create(self, request: Request) -> Response:
         """
@@ -123,31 +245,45 @@ class ProjectsViewSet(ViewSet):
         return Response(
             data={
                 "errors": serializer.errors,
-                "details": "Project creation failed!",
+                "detail": "Project creation failed!",
             },
             status=HTTP_400_BAD_REQUEST,
         )
 
     @extend_schema(
+        operation_id="projects_update",
         summary="Update an existing project",
+        description="Update all fields of an existing project. Only team captains can update projects.",
+        tags=["Projects"],
         request=ProjectSerializer,
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the project to update",
+                required=True,
+            ),
+        ],
         responses={
             HTTP_200_OK: ProjectSerializer,
-            HTTP_404_NOT_FOUND: None,
-            HTTP_400_BAD_REQUEST: None,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
         },
-        description="Update an existing project.",
-        tags=["Projects"],
     )
     def update(self, request: Request, pk: int) -> Response:
         """
         Update an existing project.
         """
         try:
-            project = Project.objects.get(pk=pk)
+            project = (
+                Project.objects.select_related("team")
+                .prefetch_related("team__members", "team__teammembership_set__user")
+                .get(pk=pk)
+            )
         except Project.DoesNotExist:
             return Response(
-                data={"details": "Project not found."},
+                data={"detail": "Project not found."},
                 status=HTTP_404_NOT_FOUND,
             )
         serializer: ProjectSerializer = ProjectSerializer(
@@ -165,31 +301,52 @@ class ProjectsViewSet(ViewSet):
         return Response(
             data={
                 "errors": serializer.errors,
-                "details": "Project update failed!",
+                "detail": "Project update failed!",
             },
             status=HTTP_400_BAD_REQUEST,
         )
 
     @extend_schema(
+        operation_id="projects_partial_update",
         summary="Partially update an existing project",
+        description="Update specific fields of an existing project. Only team captains can update projects.",
+        tags=["Projects"],
         request=ProjectSerializer,
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the project to update",
+                required=True,
+            ),
+        ],
         responses={
             HTTP_200_OK: ProjectSerializer,
-            HTTP_404_NOT_FOUND: None,
-            HTTP_400_BAD_REQUEST: None,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
         },
-        description="Partially update an existing project.",
-        tags=["Projects"],
+        examples=[
+            OpenApiExample(
+                "Partial Update Request",
+                value={"name": "Updated Project Name"},
+                request_only=True,
+            ),
+        ],
     )
     def partial_update(self, request: Request, pk: int) -> Response:
         """
         Partially update an existing project.
         """
         try:
-            project = Project.objects.get(pk=pk)
+            project = (
+                Project.objects.select_related("team")
+                .prefetch_related("team__members", "team__teammembership_set__user")
+                .get(pk=pk)
+            )
         except Project.DoesNotExist:
             return Response(
-                data={"details": "Project not found."},
+                data={"detail": "Project not found."},
                 status=HTTP_404_NOT_FOUND,
             )
         serializer: ProjectSerializer = ProjectSerializer(
@@ -209,16 +366,37 @@ class ProjectsViewSet(ViewSet):
         return Response(
             data={
                 "errors": serializer.errors,
-                "details": "Project partial update failed!",
+                "detail": "Project partial update failed!",
             },
             status=HTTP_400_BAD_REQUEST,
         )
 
     @extend_schema(
+        operation_id="projects_delete",
         summary="Delete a project",
-        responses={HTTP_204_NO_CONTENT: None, HTTP_404_NOT_FOUND: None},
-        description="Delete a project.",
+        description="Permanently delete a project. Only team captains can delete projects. This action cannot be undone.",
         tags=["Projects"],
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the project to delete",
+                required=True,
+            ),
+        ],
+        responses={
+            HTTP_204_NO_CONTENT: None,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Not Found Error",
+                value={"detail": "Project not found."},
+                response_only=True,
+                status_codes=["404"],
+            ),
+        ],
     )
     def destroy(self, request: Request, pk: int) -> Response:
         """
@@ -228,7 +406,7 @@ class ProjectsViewSet(ViewSet):
             project = Project.objects.get(pk=pk)
         except Project.DoesNotExist:
             return Response(
-                data={"details": "Project not found."},
+                data={"detail": "Project not found."},
                 status=HTTP_404_NOT_FOUND,
             )
         project.delete()
@@ -262,10 +440,36 @@ class TasksViewSet(ViewSet):
         return None
 
     @extend_schema(
+        operation_id="tasks_list",
         summary="List all tasks",
-        responses={HTTP_200_OK: TaskSerializer(many=True)},
-        description="List all tasks.",
+        description="Retrieve a list of all tasks across all projects. Includes executor and project details.",
         tags=["Tasks"],
+        responses={HTTP_200_OK: TaskSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "Success Response",
+                value={
+                    "tasks": [
+                        {
+                            "id": 1,
+                            "title": "Design UI mockups",
+                            "description": "Create initial UI designs",
+                            "priority": 2,
+                            "status": 1,
+                            "executor": 5,
+                            "project": 1,
+                            "deadline": "2025-02-15T23:59:59Z",
+                            "created_at": "2025-01-01T10:00:00Z",
+                            "updated_at": "2025-01-10T15:30:00Z",
+                        }
+                    ],
+                    "count": 1,
+                    "details": "Tasks fetched successfully!",
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
     )
     def list(self, request: Request) -> Response:
         """
@@ -292,7 +496,10 @@ class TasksViewSet(ViewSet):
 
     @extend_schema(
         summary="Retrieve a task by ID",
-        responses={HTTP_200_OK: TaskSerializer, HTTP_404_NOT_FOUND: None},
+        responses={
+            HTTP_200_OK: TaskSerializer,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+        },
         description="Retrieve a task by its ID.",
         tags=["Tasks"],
     )
@@ -311,7 +518,7 @@ class TasksViewSet(ViewSet):
             )
         except Task.DoesNotExist:
             return Response(
-                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+                data={"detail": "Task not found."}, status=HTTP_404_NOT_FOUND
             )
 
         serializer: TaskSerializer = TaskSerializer(task)
@@ -324,11 +531,49 @@ class TasksViewSet(ViewSet):
         )
 
     @extend_schema(
+        operation_id="tasks_create",
         summary="Create a new task",
-        request=TaskSerializer,
-        responses={HTTP_201_CREATED: TaskSerializer, HTTP_400_BAD_REQUEST: None},
-        description="Create a new task.",
+        description="Create a new task within a project. Tasks can be assigned to team members.",
         tags=["Tasks"],
+        request=TaskSerializer,
+        responses={
+            HTTP_201_CREATED: TaskSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Create Task Request",
+                value={
+                    "title": "Design UI mockups",
+                    "description": "Create initial UI designs for the mobile app",
+                    "priority": 2,
+                    "project": 1,
+                    "executor": 5,
+                    "deadline": "2025-02-15T23:59:59Z",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Success Response",
+                value={
+                    "task": {
+                        "id": 1,
+                        "title": "Design UI mockups",
+                        "description": "Create initial UI designs for the mobile app",
+                        "priority": 2,
+                        "status": 1,
+                        "executor": 5,
+                        "project": 1,
+                        "deadline": "2025-02-15T23:59:59Z",
+                        "created_at": "2025-01-01T10:00:00Z",
+                        "updated_at": "2025-01-01T10:00:00Z",
+                    },
+                    "details": "Task created successfully!",
+                },
+                response_only=True,
+                status_codes=["201"],
+            ),
+        ],
     )
     def create(self, request: Request) -> Response:
         """
@@ -348,7 +593,7 @@ class TasksViewSet(ViewSet):
         return Response(
             data={
                 "errors": serializer.errors,
-                "details": "Task creation failed!",
+                "detail": "Task creation failed!",
             },
             status=HTTP_400_BAD_REQUEST,
         )
@@ -358,8 +603,8 @@ class TasksViewSet(ViewSet):
         request=TaskSerializer,
         responses={
             HTTP_200_OK: TaskSerializer,
-            HTTP_404_NOT_FOUND: None,
-            HTTP_400_BAD_REQUEST: None,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
         },
         description="Update an existing task.",
         tags=["Tasks"],
@@ -370,10 +615,16 @@ class TasksViewSet(ViewSet):
         """
 
         try:
-            task = Task.objects.get(id=pk)
+            task = (
+                Task.objects.select_related("executor", "project__team")
+                .prefetch_related(
+                    "project__team__members", "project__team__teammembership_set__user"
+                )
+                .get(id=pk)
+            )
         except Task.DoesNotExist:
             return Response(
-                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+                data={"detail": "Task not found."}, status=HTTP_404_NOT_FOUND
             )
 
         serializer: TaskSerializer = TaskSerializer(
@@ -391,7 +642,7 @@ class TasksViewSet(ViewSet):
         return Response(
             data={
                 "errors": serializer.errors,
-                "details": "Task update failed!",
+                "detail": "Task update failed!",
             },
             status=HTTP_400_BAD_REQUEST,
         )
@@ -401,8 +652,8 @@ class TasksViewSet(ViewSet):
         request=TaskSerializer,
         responses={
             HTTP_200_OK: TaskSerializer,
-            HTTP_404_NOT_FOUND: None,
-            HTTP_400_BAD_REQUEST: None,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
         },
         description="Partially update an existing task.",
         tags=["Tasks"],
@@ -413,10 +664,16 @@ class TasksViewSet(ViewSet):
         """
 
         try:
-            task = Task.objects.get(id=pk)
+            task = (
+                Task.objects.select_related("executor", "project__team")
+                .prefetch_related(
+                    "project__team__members", "project__team__teammembership_set__user"
+                )
+                .get(id=pk)
+            )
         except Task.DoesNotExist:
             return Response(
-                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+                data={"detail": "Task not found."}, status=HTTP_404_NOT_FOUND
             )
 
         serializer: TaskSerializer = TaskSerializer(
@@ -434,14 +691,17 @@ class TasksViewSet(ViewSet):
         return Response(
             data={
                 "errors": serializer.errors,
-                "details": "Task partial update failed!",
+                "detail": "Task partial update failed!",
             },
             status=HTTP_400_BAD_REQUEST,
         )
 
     @extend_schema(
         summary="Delete a task",
-        responses={HTTP_204_NO_CONTENT: None, HTTP_404_NOT_FOUND: None},
+        responses={
+            HTTP_204_NO_CONTENT: None,
+            HTTP_404_NOT_FOUND: ErrorResponseSerializer,
+        },
         description="Delete a task by its ID.",
         tags=["Tasks"],
     )
@@ -454,7 +714,7 @@ class TasksViewSet(ViewSet):
             task = Task.objects.get(id=pk)
         except Task.DoesNotExist:
             return Response(
-                data={"details": "Task not found."}, status=HTTP_404_NOT_FOUND
+                data={"detail": "Task not found."}, status=HTTP_404_NOT_FOUND
             )
 
         task.delete()

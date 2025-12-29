@@ -8,11 +8,19 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_204_NO_CONTENT
+from rest_framework.status import (
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+)
 from drf_spectacular.utils import (
     extend_schema,
     OpenApiResponse,
+    OpenApiExample,
+    OpenApiParameter,
 )
+from drf_spectacular.types import OpenApiTypes
 from rest_framework.request import Request
 
 # Project modules
@@ -22,6 +30,7 @@ from apps.teams.serializers import (
     TeamListSerializer,
     TeamMembershipSerialier,
     TeamSerializer,
+    ValidationErrorResponseSerializer,
 )
 
 
@@ -48,10 +57,34 @@ class TeamViewSet(ViewSet):
         return [IsAuthenticated()]
 
     @extend_schema(
+        operation_id="teams_list",
         summary="List all teams",
-        description="Returns a list of all teams",
+        description="Retrieve a complete list of all teams in the system. Returns basic team information including member count.",
         tags=["Teams"],
-        responses={200: TeamListSerializer(many=True)},
+        responses={HTTP_200_OK: TeamListSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "Success Response",
+                value=[
+                    {
+                        "id": 1,
+                        "name": "Tech Innovators",
+                        "description": "Building the future",
+                        "member_count": 5,
+                        "inserted_at": "2025-01-01T10:00:00Z",
+                    },
+                    {
+                        "id": 2,
+                        "name": "Code Warriors",
+                        "description": "Excellence in coding",
+                        "member_count": 3,
+                        "inserted_at": "2025-01-05T14:30:00Z",
+                    },
+                ],
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
     )
     def list(self, request: Request) -> Response:
         teams = self.get_queryset().prefetch_related(
@@ -62,10 +95,60 @@ class TeamViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(
-        summary="Retrieve team",
-        description="Returns detailed information about a specific team",
+        operation_id="teams_retrieve",
+        summary="Retrieve team details",
+        description="Get detailed information about a specific team including all members and their roles. Only team members can access this endpoint.",
         tags=["Teams"],
-        responses={200: TeamSerializer},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team",
+                required=True,
+            ),
+        ],
+        responses={HTTP_200_OK: TeamSerializer},
+        examples=[
+            OpenApiExample(
+                "Team Details",
+                value={
+                    "id": 1,
+                    "name": "Tech Innovators",
+                    "description": "A team focused on innovation",
+                    "inserted_at": "2025-01-01T10:00:00Z",
+                    "updated_at": "2025-01-15T12:00:00Z",
+                    "members": [
+                        {
+                            "id": 1,
+                            "email": "captain@example.com",
+                            "full_name": "John Doe",
+                            "role": "student",
+                        },
+                        {
+                            "id": 2,
+                            "email": "member@example.com",
+                            "full_name": "Jane Smith",
+                            "role": "student",
+                        },
+                    ],
+                    "memberships": [
+                        {
+                            "id": 1,
+                            "role": "student_captain",
+                            "user": {
+                                "id": 1,
+                                "email": "captain@example.com",
+                                "full_name": "John Doe",
+                            },
+                        }
+                    ],
+                    "member_count": 5,
+                },
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
     )
     def retrieve(self, request: Request, pk: int = None) -> Response:
         team = get_object_or_404(
@@ -76,11 +159,48 @@ class TeamViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(
-        summary="Create a team",
-        description="Creates a new team",
+        operation_id="teams_create",
+        summary="Create a new team",
+        description="Create a new team. The creator automatically becomes the team captain with full permissions.",
         tags=["Teams"],
         request=TeamSerializer,
-        responses={201: TeamSerializer},
+        responses={
+            HTTP_201_CREATED: TeamSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Create Team Request",
+                value={
+                    "name": "Tech Innovators",
+                    "description": "A team focused on cutting-edge technology",
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Success Response",
+                value={
+                    "id": 1,
+                    "name": "Tech Innovators",
+                    "description": "A team focused on cutting-edge technology",
+                    "inserted_at": "2025-01-01T10:00:00Z",
+                    "updated_at": "2025-01-01T10:00:00Z",
+                    "members": [],
+                    "memberships": [],
+                    "member_count": 1,
+                },
+                response_only=True,
+                status_codes=["201"],
+            ),
+            OpenApiExample(
+                "Validation Error",
+                value={
+                    "name": ["This field is required."],
+                },
+                response_only=True,
+                status_codes=["400"],
+            ),
+        ],
     )
     def create(self, request: Request) -> Response:
         serializer = TeamSerializer(data=request.data, context={"request": request})
@@ -92,13 +212,27 @@ class TeamViewSet(ViewSet):
             team=team, user=request.user, role="student_captain"
         )
 
-        return Response(serializer.data, status=201)
+        return Response(serializer.data, status=HTTP_201_CREATED)
 
     @extend_schema(
-        summary="Update team",
+        operation_id="teams_update",
+        summary="Update team information",
+        description="Update all fields of a team. Only team captains can update team information.",
         tags=["Teams"],
         request=TeamSerializer,
-        responses={200: TeamSerializer},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team to update",
+                required=True,
+            ),
+        ],
+        responses={
+            HTTP_200_OK: TeamSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
     )
     def update(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
@@ -114,10 +248,36 @@ class TeamViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(
+        operation_id="teams_partial_update",
         summary="Partially update team",
+        description="Update specific fields of a team. Only team captains can update team information.",
         tags=["Teams"],
         request=TeamSerializer,
-        responses={200: TeamSerializer},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team to update",
+                required=True,
+            ),
+        ],
+        responses={
+            HTTP_200_OK: TeamSerializer,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Update Name Only",
+                value={"name": "Updated Team Name"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Update Description Only",
+                value={"description": "Updated team description"},
+                request_only=True,
+            ),
+        ],
     )
     def partial_update(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
@@ -128,40 +288,118 @@ class TeamViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(
+        operation_id="teams_delete",
         summary="Delete a team",
+        description="Permanently delete a team and all associated data. Only team captains can delete teams. This action cannot be undone.",
         tags=["Teams"],
-        responses={204: None},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team to delete",
+                required=True,
+            ),
+        ],
+        responses={HTTP_204_NO_CONTENT: None},
     )
     def destroy(self, request: Request, pk: int = None) -> Response:
         team = self.get_object(pk)
         self.check_object_permissions(request, team)
 
         team.delete()
-        return Response(status=204)
+        return Response(status=HTTP_204_NO_CONTENT)
 
     @extend_schema(
+        operation_id="teams_my_teams",
         summary="Get my teams",
-        description="Returns a list of teams the authenticated user is a member of",
+        description="Retrieve a list of all teams where the authenticated user is a member. Returns teams with basic information and member count.",
         tags=["Teams"],
-        responses={200: TeamListSerializer(many=True)},
+        responses={HTTP_200_OK: TeamListSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "User's Teams",
+                value=[
+                    {
+                        "id": 1,
+                        "name": "Tech Innovators",
+                        "description": "My main team",
+                        "member_count": 5,
+                        "inserted_at": "2025-01-01T10:00:00Z",
+                    },
+                    {
+                        "id": 3,
+                        "name": "Side Project",
+                        "description": "Weekend project team",
+                        "member_count": 2,
+                        "inserted_at": "2025-01-10T15:00:00Z",
+                    },
+                ],
+                response_only=True,
+                status_codes=["200"],
+            ),
+            OpenApiExample(
+                "No Teams",
+                value=[],
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
     )
     @action(detail=False, methods=["get"])
     def my_teams(self, request: Request) -> Response:
-        teams = Team.objects.filter(members=request.user)
+        teams = Team.objects.filter(members=request.user).prefetch_related(
+            "members", "teammembership_set__user"
+        )
         serializer = TeamListSerializer(teams, many=True, context={"request": request})
         return Response(serializer.data)
 
     @extend_schema(
+        operation_id="teams_leave",
         summary="Leave a team",
-        description=(
-            "Allows a user to leave a team. " "Captains cannot leave their team"
-        ),
+        description="""Allow a user to leave a team.
+        
+        **Restrictions:**
+        - Team captains cannot leave their team
+        - Must be a member of the team to leave
+        
+        **Note:** To transfer captain role before leaving, update the membership roles first.
+        """,
         request=None,
         tags=["Teams"],
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team to leave",
+                required=True,
+            ),
+        ],
         responses={
-            200: OpenApiResponse(description="Successfully left the team"),
-            400: OpenApiResponse(description="Error occurred"),
+            HTTP_200_OK: OpenApiResponse(description="Successfully left the team"),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(description="Error occurred"),
         },
+        examples=[
+            OpenApiExample(
+                "Success Response",
+                value={"message": "You have successfully left the team."},
+                response_only=True,
+                status_codes=["200"],
+            ),
+            OpenApiExample(
+                "Captain Cannot Leave",
+                value={"detail": "The team captain cannot leave the team."},
+                response_only=True,
+                status_codes=["400"],
+            ),
+            OpenApiExample(
+                "Not a Member",
+                value={"detail": "You are not a member of this team."},
+                response_only=True,
+                status_codes=["400"],
+            ),
+        ],
     )
     @action(detail=True, methods=["post"])
     def leave_team(self, request: Request, pk: int = None) -> Response:
@@ -175,7 +413,8 @@ class TeamViewSet(ViewSet):
 
         if is_captain:
             return Response(
-                {"error": "The team captain cannot leave the team."}, status=400
+                {"detail": "The team captain cannot leave the team."},
+                status=HTTP_400_BAD_REQUEST,
             )
 
         try:
@@ -183,10 +422,13 @@ class TeamViewSet(ViewSet):
             membership.delete()
 
             return Response(
-                {"message": "You have successfully left the team."}, status=200
+                {"message": "You have successfully left the team."}, status=HTTP_200_OK
             )
         except TeamMembership.DoesNotExist:
-            return Response({"error": "You are not a member of this team."}, status=400)
+            return Response(
+                {"detail": "You are not a member of this team."},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
 
 class TeamMembershipViewSet(ViewSet):
@@ -195,7 +437,8 @@ class TeamMembershipViewSet(ViewSet):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        responses={200: OpenApiResponse(description="Permissions retrieved")},
+        summary="Retrieve permissions",
+        responses={HTTP_200_OK: OpenApiResponse(description="Permissions retrieved")},
         description="Retrieve permissions depending on action",
         tags=["Permissions"],
     )
@@ -213,10 +456,48 @@ class TeamMembershipViewSet(ViewSet):
         return get_object_or_404(TeamMembership, pk=pk)
 
     @extend_schema(
-        summary="List all team members",
-        description="Returns a list of all team memberships",
+        operation_id="team_memberships_list",
+        summary="List all team memberships",
+        description="Retrieve a complete list of all team memberships across all teams. Shows user details and their role in each team.",
         tags=["TeamMembership"],
-        responses={200: TeamMembershipSerialier(many=True)},
+        responses={HTTP_200_OK: TeamMembershipSerialier(many=True)},
+        examples=[
+            OpenApiExample(
+                "Memberships List",
+                value=[
+                    {
+                        "id": 1,
+                        "team": 1,
+                        "team_name": "Tech Innovators",
+                        "role": "student_captain",
+                        "user": {
+                            "id": 1,
+                            "email": "captain@example.com",
+                            "full_name": "John Doe",
+                            "role": "student",
+                        },
+                        "inserted_at": "2025-01-01T10:00:00Z",
+                        "updated_at": "2025-01-01T10:00:00Z",
+                    },
+                    {
+                        "id": 2,
+                        "team": 1,
+                        "team_name": "Tech Innovators",
+                        "role": "student_member",
+                        "user": {
+                            "id": 2,
+                            "email": "member@example.com",
+                            "full_name": "Jane Smith",
+                            "role": "student",
+                        },
+                        "inserted_at": "2025-01-02T14:00:00Z",
+                        "updated_at": "2025-01-02T14:00:00Z",
+                    },
+                ],
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
     )
     def list(self, request: Request) -> Response:
         queryset = self.get_queryset().select_related("user", "team")
@@ -224,24 +505,81 @@ class TeamMembershipViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(
-        summary="Retrieve a team member",
-        description="Returns details of a specific team membership",
+        operation_id="team_memberships_retrieve",
+        summary="Retrieve team membership details",
+        description="Get detailed information about a specific team membership including user and team details.",
         tags=["TeamMembership"],
-        responses={200: TeamMembershipSerialier},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team membership",
+                required=True,
+            ),
+        ],
+        responses={HTTP_200_OK: TeamMembershipSerialier},
     )
     def retrieve(self, request: Request, pk: int = None) -> Response:
-        membership = self.get_object(pk)
+        membership = get_object_or_404(
+            TeamMembership.objects.select_related("user", "team"), pk=pk
+        )
         self.check_object_permissions(request, membership)
 
         serializer = self.serializer_class(membership)
         return Response(serializer.data)
 
     @extend_schema(
-        summary="Add a team member",
-        description="Only team captains can add members to the team",
+        operation_id="team_memberships_create",
+        summary="Add a member to team",
+        description="""Add a new member to a team with a specific role.
+        
+        **Permissions:**
+        - Only team captains can add members
+        - Cannot add a user who is already a member
+        
+        **Available Roles:**
+        - `student_captain`: Full permissions
+        - `student_member`: Regular member
+        """,
         request=TeamMembershipSerialier,
         tags=["TeamMembership"],
-        responses={201: TeamMembershipSerialier},
+        responses={
+            HTTP_201_CREATED: TeamMembershipSerialier,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Add Member Request",
+                value={"team": 1, "user_id": 5, "role": "student_member"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Success Response",
+                value={
+                    "id": 3,
+                    "team": 1,
+                    "team_name": "Tech Innovators",
+                    "role": "student_member",
+                    "user": {
+                        "id": 5,
+                        "email": "newmember@example.com",
+                        "full_name": "Alice Johnson",
+                        "role": "student",
+                    },
+                    "inserted_at": "2025-01-15T10:00:00Z",
+                    "updated_at": "2025-01-15T10:00:00Z",
+                },
+                response_only=True,
+                status_codes=["201"],
+            ),
+            OpenApiExample(
+                "Already a Member Error",
+                value={"error": "This user is already a member of the team"},
+                response_only=True,
+                status_codes=["400"],
+            ),
+        ],
     )
     def create(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data)
@@ -258,14 +596,27 @@ class TeamMembershipViewSet(ViewSet):
             raise PermissionDenied("Only team captain can add members")
 
         serializer.save()
-        return Response(serializer.data, status=201)
+        return Response(serializer.data, status=HTTP_201_CREATED)
 
     @extend_schema(
-        summary="Update a team member",
-        description="Update a team membership",
+        operation_id="team_memberships_update",
+        summary="Update team membership",
+        description="Update team membership details including role changes. Only team captains can update memberships.",
         request=TeamMembershipSerialier,
         tags=["TeamMembership"],
-        responses={200: TeamMembershipSerialier},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team membership to update",
+                required=True,
+            ),
+        ],
+        responses={
+            HTTP_200_OK: TeamMembershipSerialier,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
     )
     def update(self, request: Request, pk: int = None) -> Response:
         membership = self.get_object(pk)
@@ -277,11 +628,36 @@ class TeamMembershipViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(
-        summary="Partially update a team member",
-        description="Partially update a team membership",
+        operation_id="team_memberships_partial_update",
+        summary="Partially update team membership",
+        description="Update specific fields of a team membership, such as changing a member's role. Only team captains can update memberships.",
         request=TeamMembershipSerialier,
         tags=["TeamMembership"],
-        responses={200: TeamMembershipSerialier},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team membership to update",
+                required=True,
+            ),
+        ],
+        responses={
+            HTTP_200_OK: TeamMembershipSerialier,
+            HTTP_400_BAD_REQUEST: ValidationErrorResponseSerializer,
+        },
+        examples=[
+            OpenApiExample(
+                "Change Role to Captain",
+                value={"role": "student_captain"},
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Change Role to Member",
+                value={"role": "student_member"},
+                request_only=True,
+            ),
+        ],
     )
     def partial_update(self, request: Request, pk: int = None) -> Response:
         membership = self.get_object(pk)
@@ -293,10 +669,20 @@ class TeamMembershipViewSet(ViewSet):
         return Response(serializer.data)
 
     @extend_schema(
-        summary="Delete a team member",
-        description="Deletes a specific team membership",
+        operation_id="team_memberships_delete",
+        summary="Remove team member",
+        description="Remove a member from a team. Only team captains can remove members. This action cannot be undone.",
         tags=["TeamMembership"],
-        responses={204: None},
+        parameters=[
+            OpenApiParameter(
+                name="pk",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description="Unique identifier of the team membership to delete",
+                required=True,
+            ),
+        ],
+        responses={HTTP_204_NO_CONTENT: None},
     )
     def destroy(self, request: Request, pk: int = None) -> Response:
         membership = self.get_object(pk)
