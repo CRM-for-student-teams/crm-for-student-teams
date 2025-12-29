@@ -5,6 +5,10 @@ from decouple import config
 from settings.base import *  # noqa
 
 DEBUG = True
+
+# Add django-debug-toolbar only in dev
+INSTALLED_APPS += ["debug_toolbar"]  # noqa
+MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa
 ALLOWED_HOSTS = (
     config("DJANGO_ALLOWED_HOSTS", cast=str).split(",")
     if config("DJANGO_ALLOWED_HOSTS", cast=str)

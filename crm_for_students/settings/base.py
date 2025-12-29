@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 # Python modules
 from decouple import config
+
 # Project modules
 from settings.config import *  # noqa F403
 
@@ -25,12 +26,7 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
-PROJECT_APPS = [
-    "apps.projects",
-    "apps.teams",
-    "apps.chats",
-    "apps.commons"
-]
+PROJECT_APPS = ["apps.projects", "apps.teams", "apps.chats", "apps.commons"]
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
@@ -38,7 +34,6 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "drf_spectacular",
     "drf_spectacular_sidecar",
-    "debug_toolbar",
     "channels",
     "channels_redis",
 ]
@@ -69,7 +64,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 TEMPLATES = [
     {
