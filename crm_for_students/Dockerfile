@@ -12,13 +12,10 @@ RUN uv pip install --system --no-cache -r prod.txt
 # Copy application
 COPY . .
 
-# Create static directory and collect static files
-RUN mkdir -p /app/static && \
-    python manage.py collectstatic --noinput --clear
-
 ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-CMD python manage.py migrate && \
+CMD python manage.py collectstatic --noinput --clear && \
+    python manage.py migrate && \
     uvicorn settings.asgi:application --host 0.0.0.0 --port 8000
